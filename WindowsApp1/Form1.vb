@@ -46,8 +46,7 @@ Public Class Form1
 
       While True
 
-         Try
-
+            Try
                 If Not HaySistemas() Then
 
                     ActLog("ERROR *** sin sistema")
@@ -111,50 +110,15 @@ Public Class Form1
 
                     Else
 
-                        '?  SINO HAY FACTURA  VERIFICAR LAS FACTURAS ENVIADAS
-                        '?     =>   VERIFICAR LAS FACTURAS ENVIADAS
 
-                        sql = $"select top {factParalelas} id,enc_clave from [fact.factura] where confirmacionMsg is null or confirmacionMsg ='' "
-                        factDB = conn.llenaTabla(sql)
+                        revisa_estado_comprobante(factParalelas, TK)
 
-                        Dim sqlActualiza As String = ""
-
-                        Dim clave As String = ""
-                        Dim envia = New enviaHacienda(CSA_config)
-
-                        For Each fila In factDB.Rows
-                            idFact = fila.item("id")
-                            clave = fila.item("enc_clave")
-                            ActLog($"Factura: {idFact}")
-
-                            Dim compro As New EG.EnviaFactura.Comprobante
-                            compro = envia.comprobante(clave, TK)  ''ok
-                            Dim respuesta As String = envia.jsonRespuesta
-
-                            Select Case envia.estado
-                                Case "200"
-                                    sqlActualiza = $"UPDATE [fact.factura] SET confirmacionMsg = '{respuesta}' WHERE (Id = {idFact})"
-                                    conn.ejecuta(sqlActualiza)
-
-                                    ActLog($"Confirmación: {respuesta}")
-                                Case "404"
-                                    '?     =>   SINO FUE RECIBIDA ;;; REENVIA DE NUEVO Y LIMIPA confirmacionMSG en tabla fac.factura
-                                    '? ojo actualizar el nombre del archivo XML
-                                    Dim rutaArchivos = cnf.Item("rutaArch") & "\" & clave & ".xml"
-                                    If File.Exists(rutaArchivos) Then
-                                        ReenviaXML_Hda(idFact, rutaArchivos, CSA_config, TK)
-                                    End If
-
-                                Case Else
-                                    ActLog($"error: {envia.respuestaHacienda}")
-                            End Select
-                        Next
                     End If
 
                 End If
 
-         Catch ex As Exception
-            ActLog("ERROR ***:" & ex.Message & " ::: " & ex.StackTrace)
+            Catch ex As Exception
+                ActLog("ERROR ***:" & ex.Message & " ::: " & ex.StackTrace)
             'Throw New Exception(ex.Message)
             Thread.Sleep(5000)
          End Try
@@ -162,8 +126,52 @@ Public Class Form1
 
    End Sub
 
+    Private Sub revisa_estado_comprobante(factParalelas As Integer, TK As String)
 
-   Private Sub ReenviaXML_Hda(idFact As Integer, archivoXML As String, emisor As confComunicacion, TK As String)
+        '?  SINO HAY FACTURA  VERIFICAR LAS FACTURAS ENVIADAS
+        '?     =>   VERIFICAR LAS FACTURAS ENVIADAS
+
+        Dim Sql = $"select top {factParalelas} id,enc_clave from [fact.factura] where confirmacionMsg is null or confirmacionMsg ='' "
+        Dim factDB = conn.llenaTabla(Sql)
+
+        Dim sqlActualiza As String = ""
+
+        Dim clave As String = ""
+        Dim envia = New enviaHacienda(CSA_config)
+        Dim idFact
+
+        For Each fila In factDB.Rows
+            idFact = fila.item("id")
+            clave = fila.item("enc_clave")
+            ActLog($"Factura: {idFact}")
+
+            Dim compro As New EG.EnviaFactura.Comprobante
+            compro = envia.comprobante(clave, TK)  ''ok
+            Dim respuesta As String = envia.jsonRespuesta
+
+            Select Case envia.estado
+                Case "200"
+                    sqlActualiza = $"UPDATE [fact.factura] SET confirmacionMsg = '{respuesta}' WHERE (Id = {idFact})"
+                    conn.ejecuta(sqlActualiza)
+
+                    ActLog($"Confirmación: {respuesta}")
+                Case "404"
+                    '?     =>   SINO FUE RECIBIDA ;;; REENVIA DE NUEVO Y LIMIPA confirmacionMSG en tabla fac.factura
+                    '? ojo actualizar el nombre del archivo XML
+                    Dim rutaArchivos = cnf.Item("rutaArch") & "\" & clave & ".xml"
+                    If File.Exists(rutaArchivos) Then
+                        ReenviaXML_Hda(idFact, rutaArchivos, CSA_config, TK)
+                    End If
+
+                Case Else
+                    ActLog($"error: {envia.respuestaHacienda}")
+            End Select
+        Next
+    End Sub
+
+
+
+    Private Sub ReenviaXML_Hda(idFact As Integer, archivoXML As String, emisor As confComunicacion, TK As String)
       Try
          Dim envia As Object
          Dim response As HttpResponseMessage

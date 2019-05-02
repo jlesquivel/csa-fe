@@ -68,7 +68,6 @@ Public Class GestionaFactura
                 pdf.GenerarPDf(rutaArchivos, res.ClaveDocCreada, idFact, My.Settings.emisor_servidor)
             End If
 
-
             '?/////////////////////////////////////////////////////////////////////////////////////////////////// ENVIA HACIENDA
 
             Dim envia As Object
@@ -86,12 +85,12 @@ Public Class GestionaFactura
                     ActualizaBD(idFact, envia.estado, envia.respuestaHacienda)
                 Case "aceptado"
                     'todo REVISAR BIEN EL ENVIO DE CORREO DA ERRORES GRAVES
-
                     EnviaCorreo(idFact, rutaArchivos, res.ClaveDocCreada)
                     ActualizaBD(idFact, envia.estado, "")
                 Case "procesando"
                     ActualizaBD(idFact, envia.estado, "")
                 Case "rechazado"
+                    'todo hacer nota de credito que cancel la factura
                     MensajeError = envia.respuestaHacienda
                     ActualizaBD(idFact, envia.estado, envia.respuestaHacienda)
                 Case "error"
