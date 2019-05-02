@@ -1,8 +1,8 @@
 ﻿Imports System.Threading
 Imports EG.EnviaFactura
 Imports CR.FacturaElectronica
-Imports EG.CajaHerramientas
-Imports System.Data.SqlClient
+'Imports EG.CajaHerramientas
+'Imports System.Data.SqlClient
 Imports System.Net.Http
 
 Public Class GestionaFactura
@@ -36,11 +36,11 @@ Public Class GestionaFactura
       _doneEvent = doneEvent
    End Sub
 
-   Public Sub GeneraFactura(threadContext As Object)
+    Public Sub GeneraFactura(threadContext As Object)
 
-      Dim threadIndex As Integer = CType(threadContext, Integer)
-      Dim res As RespuestaCreacionDoc
-      Dim rutaArchivos As String = ""
+        Dim threadIndex As Integer = CType(threadContext, Integer)
+        Dim res As RespuestaCreacionDoc
+        Dim rutaArchivos As String = ""
 
 
         Try
@@ -70,48 +70,18 @@ Public Class GestionaFactura
 
             '?/////////////////////////////////////////////////////////////////////////////////////////////////// ENVIA HACIENDA
 
-            Dim envia As Object
-
-            envia = New enviaHacienda(res.archivo, emisor, TK)
+            Dim envia = New enviaHacienda(res.archivo, emisor, TK)
             respuesta = envia.Procesa()
             response = envia.response
 
-            resultado = envia.estado
+            resultado = response.ReasonPhrase
             respuesta = envia.respuestaHacienda
             MensajeError = ""
 
-            Select Case envia.estado
-                Case "recibido"
-                    ActualizaBD(idFact, envia.estado, envia.respuestaHacienda)
-                Case "aceptado"
-                    'todo REVISAR BIEN EL ENVIO DE CORREO DA ERRORES GRAVES
-                    EnviaCorreo(idFact, rutaArchivos, res.ClaveDocCreada)
-                    ActualizaBD(idFact, envia.estado, "")
-                Case "procesando"
-                    ActualizaBD(idFact, envia.estado, "")
-                Case "rechazado"
-                    'todo hacer nota de credito que cancel la factura
-                    MensajeError = envia.respuestaHacienda
-                    ActualizaBD(idFact, envia.estado, envia.respuestaHacienda)
-                Case "error"
-                    MensajeError = envia.respuestaHacienda
-                    ActualizaBD(idFact, "error", envia.respuestaHacienda)
-                Case Else
-                    If envia.estado Is Nothing Then
-                        MessageBox.Show(envia.ToString)
-                    End If
-                    ActualizaBD(idFact, "error", "")
-            End Select
-
-            ' cargar el archivo PDF al servidor web CSALIB.ORG
-            Dim ftpCSALIB As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
-            Dim ftpCSALIB2 As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
-
-            ftpCSALIB.enviar(rutaArchivos & res.ClaveDocCreada & ".xml")
-            ftpCSALIB2.enviar(rutaArchivos & res.ClaveDocCreada & ".pdf")
-
-            ftpCSALIB = Nothing
-            ftpCSALIB2 = Nothing
+            If response.IsSuccessStatusCode Then
+                Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{response.ReasonPhrase}' where id = {idFact} "
+                strConexion.ejecuta(instSQL)
+            End If
 
         Catch ex As Exception
             'TODO Corregir problema al detectar error en ftpCSALIB.enviar
@@ -121,31 +91,6 @@ Public Class GestionaFactura
         End Try
         _doneEvent.Set()
 
-   End Sub
-
-   Function EnviaCorreo(factura As Integer, ruta As String, clave As String) As String
-      Try
-         '? Enviar por correo el archivo 
-         Dim correo As New cCorreo With {.cnf = cnf}
-         correo.enviar(factura, ruta, clave, emisor)
-         Return correo.statusEnvio
-
-      Catch ex As Exception
-         Throw
-      End Try
-
-   End Function
-
-   Sub ActualizaBD(idFact As Integer, pEstado As String, pMsg As String)
-      '?  actualizar en base de datos que fue enviado correo,
-      Try
-         pMsg = pMsg.Replace("'", "")  'elimina caracteres para poder insertar
-         Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{pEstado}',confirmacionMsg = N'{pMsg}' where id = {idFact} "
-         strConexion.ejecuta(instSQL)
-
-      Catch ex As Exception
-         Throw
-      End Try
-   End Sub
+    End Sub
 
 End Class

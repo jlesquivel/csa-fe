@@ -21,7 +21,7 @@
       <Value Profile="(Default)">3002182080</Value>
     </Setting>
     <Setting Name="emisor_servidor" Type="System.String" Scope="User">
-      <Value Profile="(Default)">api-prod</Value>
+      <Value Profile="(Default)">api-stag</Value>
     </Setting>
     <Setting Name="FacturacionConnectionString" Type="(Connection string)" Scope="Application">
       <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;

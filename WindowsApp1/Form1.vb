@@ -32,19 +32,19 @@ Public Class Form1
    Public Property cnf As DataRow
 
 
-   '*******************************************************************
+    '*******************************************************************
 #Region "Activa Hilo Procesa Facturas"
 
-   Sub GenerarFactura()
+    Sub GenerarFactura()
 
-      Dim idFact As Integer
-      Dim TK As String = ""
-      Dim TKexpired As Boolean = True
-      Dim iTokenHacienda As New TokenHacienda
+        Dim idFact As Integer
+        Dim TK As String = ""
+        Dim TKexpired As Boolean = True
+        Dim iTokenHacienda As New TokenHacienda
 
-      Dim factParalelas As Integer = cnf.Item("factParalelas")
+        Dim factParalelas As Integer = cnf.Item("factParalelas")
 
-      While True
+        While True
 
             Try
                 If Not HaySistemas() Then
@@ -56,7 +56,7 @@ Public Class Form1
                     'If CInt(lbDisponible.Text) >= (factParalelas * 2) Then
                     factParalelas = cnf.Item("factParalelas")
 
-                    Dim sql As String = $"select top {factParalelas} id from [fact.factura] where enc_clave is null"
+                    Dim sql As String = $"select top {factParalelas} id from [fact.factura] where enc_clave is null  OR (enc_clave IS NOT NULL AND confirmacion IS NULL)"
                     Dim factDB = conn.llenaTabla(sql)
 
                     Dim facturar As New cFactura With {.rutaArchivos = cnf.Item("rutaArch")}
@@ -110,28 +110,25 @@ Public Class Form1
 
                     Else
 
-
-                        revisa_estado_comprobante(factParalelas, TK)
-
+                        revisa_estado_recepcion(factParalelas, TK)
                     End If
 
                 End If
 
             Catch ex As Exception
                 ActLog("ERROR ***:" & ex.Message & " ::: " & ex.StackTrace)
-            'Throw New Exception(ex.Message)
-            Thread.Sleep(5000)
-         End Try
-      End While
+                'Throw New Exception(ex.Message)
+                Thread.Sleep(5000)
+            End Try
+        End While
 
-   End Sub
+    End Sub
 
-    Private Sub revisa_estado_comprobante(factParalelas As Integer, TK As String)
+    Private Sub revisa_estado_recepcion(factParalelas As Integer, TK As String)
 
-        '?  SINO HAY FACTURA  VERIFICAR LAS FACTURAS ENVIADAS
-        '?     =>   VERIFICAR LAS FACTURAS ENVIADAS
+        Thread.Sleep(5000)
 
-        Dim Sql = $"select top {factParalelas} id,enc_clave from [fact.factura] where confirmacionMsg is null or confirmacionMsg ='' "
+        Dim Sql = $"select top {factParalelas} id,enc_clave from [fact.factura] where confirmacion in ('Accepted','procesando') "
         Dim factDB = conn.llenaTabla(Sql)
 
         Dim sqlActualiza As String = ""
@@ -145,52 +142,62 @@ Public Class Form1
             clave = fila.item("enc_clave")
             ActLog($"Factura: {idFact}")
 
-            Dim compro As New EG.EnviaFactura.Comprobante
-            compro = envia.comprobante(clave, TK)  ''ok
+            Dim compro = envia.consulta(clave, TK)  ''ok
+
             Dim respuesta As String = envia.jsonRespuesta
+            Dim estado As String = envia.estado
 
-            Select Case envia.estado
-                Case "200"
-                    sqlActualiza = $"UPDATE [fact.factura] SET confirmacionMsg = '{respuesta}' WHERE (Id = {idFact})"
-                    conn.ejecuta(sqlActualiza)
+            Select Case estado
+                Case "aceptado"
+                    Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}',confirmacionMsg = N'{respuesta}' where id = {idFact} "
+                    conn.ejecuta(instSQL)
 
-                    ActLog($"Confirmación: {respuesta}")
-                Case "404"
-                    '?     =>   SINO FUE RECIBIDA ;;; REENVIA DE NUEVO Y LIMIPA confirmacionMSG en tabla fac.factura
-                    '? ojo actualizar el nombre del archivo XML
-                    Dim rutaArchivos = cnf.Item("rutaArch") & "\" & clave & ".xml"
-                    If File.Exists(rutaArchivos) Then
-                        ReenviaXML_Hda(idFact, rutaArchivos, CSA_config, TK)
-                    End If
+                    '' ENVIAR XML, PDF , ACUSE A RECEPTOR
+                    '' cargar el archivo PDF al servidor web CSALIB.ORG
 
-                Case Else
-                    ActLog($"error: {envia.respuestaHacienda}")
+                    Dim ftpCSALIB As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
+                    Dim ftpCSALIB2 As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
+
+                    Dim ruta = cnf.Item("rutaArch")
+                    ruta = ruta & IIf(ruta.EndsWith("\"), "", "\")
+
+                    ftpCSALIB.enviar(ruta & clave & ".xml")
+                    ftpCSALIB2.enviar(ruta & clave & ".pdf")
+
+                    ftpCSALIB = Nothing
+                    ftpCSALIB2 = Nothing
+
+                    EnviaCorreo(idFact, ruta, clave)
+
+                Case "procesando"
+                    Thread.Sleep(5000)
+                Case "rechazado"
+                    '' CREAR NOTA DE CREDITO PARA CANCELAR LA FACTURA
+
+                Case "error"
+                    '' CONTACTAR HACIENDA  
+
             End Select
+
+            ActLabel(envia.response)
         Next
     End Sub
 
+    Function EnviaCorreo(factura As Integer, ruta As String, clave As String) As String
+        Try
+            '? Enviar por correo el archivo 
+            Dim correo As New cCorreo With {.cnf = cnf}
+            correo.enviar(factura, ruta, clave, CSA_config)
+            Return correo.statusEnvio
+
+        Catch ex As Exception
+            Throw
+        End Try
+
+    End Function
 
 
-    Private Sub ReenviaXML_Hda(idFact As Integer, archivoXML As String, emisor As confComunicacion, TK As String)
-      Try
-         Dim envia As Object
-         Dim response As HttpResponseMessage
-         Dim respuesta As String = ""
-
-         envia = New enviaHacienda(archivoXML, emisor, TK)
-         respuesta = envia.Procesa()
-         response = envia.response
-
-         Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '',confirmacionMsg = N'' where id = {idFact} "
-         conn.ejecuta(instSQL)
-
-      Catch ex As Exception
-         Throw
-      End Try
-   End Sub
-
-
-   Private Sub EsperarTermine(eventos As Object)
+    Private Sub EsperarTermine(eventos As Object)
       Dim evs() As ManualResetEvent = eventos
       WaitHandle.WaitAll(evs)   '' espera que terminen todo los hilos
    End Sub

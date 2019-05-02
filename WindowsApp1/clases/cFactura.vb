@@ -195,7 +195,6 @@ Public Class cFactura
                 }
       End If
 
-
         'TODO corregir el tipo de documento que no solo sea factura
         ' 
         Dim p As New DocumentoParametros() With {

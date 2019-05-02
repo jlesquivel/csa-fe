@@ -198,36 +198,34 @@ Public Class enviaHacienda
 
 
 
-   Public Function consulta() As String
-      Try
-         If Clave.Trim.Length = 0 Then
-            Throw New Exception("falta la clave de la factura para consultar")
-         End If
+    Public Function consulta(pclave As String, pTK As String) As String
+        Try
+            If pclave.Trim.Length = 0 Then
+                Throw New Exception("falta la clave de la factura para consultar")
+            End If
 
-         If TokenHacienda <> "" Then
-            Dim enviaFactura As New Comunicacion
-            enviaFactura.ConsultaEstatus(TokenHacienda, Clave)
+            If pTK <> "" Then
+                Dim enviaFactura As New Comunicacion
+                enviaFactura.ConsultaEstatus(pTK, pclave)
 
-            estado = enviaFactura.estadoFactura
+                estado = enviaFactura.estadoFactura
+                jsonRespuesta = enviaFactura.jsonRespuesta
 
-            Dim jsonRespuesta As String = ""
-            jsonRespuesta = enviaFactura.jsonRespuesta
+                Return enviaFactura.mensajeRespuesta
+            End If
 
-            Return enviaFactura.mensajeRespuesta
-         End If
-
-         Return ""
-      Catch ex As Exception
-         Return ex.Message
-      End Try
-   End Function
+            Return Nothing
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
 
 
-   ''////////////////////////////////////////////////////////////////////////    Seccion de Comprobantes
-   ''
-   ''
+    ''////////////////////////////////////////////////////////////////////////    Seccion de Comprobantes
+    ''
+    ''
 
-   Public Function comprobante(clave As String, pTK As String) As Comprobante
+    Public Function comprobante(clave As String, pTK As String) As Comprobante
       TokenHacienda = pTK
 
       Dim enviaFactura As New Comunicacion With {.URL_RECEPCION = configuracion.apiURL}
