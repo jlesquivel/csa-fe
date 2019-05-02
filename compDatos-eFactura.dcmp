@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DataComparison>
+  <Version>10</Version>
+  <ConnectionProperties1>
+    <ConnectionString>Data Source=(LocalDB)\MSSQLLocalDB;Initial Catalog=eFactura;Integrated Security=True;Pooling=False;MultipleActiveResultSets=False</ConnectionString>
+    <FullDisplayName>(LocalDB)\MSSQLLocalDB.eFactura (TOSHIBA\Jose Luis Esquivel)</FullDisplayName>
+  </ConnectionProperties1>
+  <ConnectionProperties2>
+    <ConnectionString>Data Source=SERVIDOR-BD;Initial Catalog=eFactura;Persist Security Info=True;User ID=SA;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=True</ConnectionString>
+    <FullDisplayName>SERVIDOR-BD.eFactura (SA)</FullDisplayName>
+  </ConnectionProperties2>
+  <SessionSettings>Default</SessionSettings>
+  <DeselectedTable>[dbo].[fact.factura]</DeselectedTable>
+  <DeselectedTable>[dbo].[fact.facturaDetalle]</DeselectedTable>
+</DataComparison>

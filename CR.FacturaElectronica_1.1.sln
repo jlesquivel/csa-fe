@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CR.FacturaElectronica", "CR.FacturaElectronica\CR.FacturaElectronica.csproj", "{829E2333-A3AA-4159-A124-59549E38E12B}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "gestionFacturas", "WindowsApp1\gestionFacturas.vbproj", "{75383B97-6CDB-4476-939A-82FD2104203C}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EG.CajaHerramientas", "EG.CajaHerramientas\EG.CajaHerramientas.vbproj", "{51CF4CB8-4A39-4149-956F-9C1C52F93133}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PRUEBAS", "ConsoleApp1\PRUEBAS.vbproj", "{BA151700-8469-416D-9617-AB56B372569A}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "EG.EnviaFactura", "EG.EnviaFactura\EG.EnviaFactura.vbproj", "{4F5A2D09-E72F-43AB-B049-31CF58D2A4A5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CR.FacturaElectronica", "CR.FacturaElectronica", "{A28F32D5-4E42-4CD5-9550-AE9B56E613A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EG", "EG", "{FEEA77F5-239B-4A9D-A9C9-1D9A11607718}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "eFactura", "eFactura\eFactura.vdproj", "{79963D6A-99E5-4F42-A9D2-308BBDCD7667}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{829E2333-A3AA-4159-A124-59549E38E12B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{829E2333-A3AA-4159-A124-59549E38E12B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{829E2333-A3AA-4159-A124-59549E38E12B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{829E2333-A3AA-4159-A124-59549E38E12B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75383B97-6CDB-4476-939A-82FD2104203C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75383B97-6CDB-4476-939A-82FD2104203C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75383B97-6CDB-4476-939A-82FD2104203C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75383B97-6CDB-4476-939A-82FD2104203C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51CF4CB8-4A39-4149-956F-9C1C52F93133}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51CF4CB8-4A39-4149-956F-9C1C52F93133}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51CF4CB8-4A39-4149-956F-9C1C52F93133}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51CF4CB8-4A39-4149-956F-9C1C52F93133}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA151700-8469-416D-9617-AB56B372569A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA151700-8469-416D-9617-AB56B372569A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA151700-8469-416D-9617-AB56B372569A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA151700-8469-416D-9617-AB56B372569A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F5A2D09-E72F-43AB-B049-31CF58D2A4A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F5A2D09-E72F-43AB-B049-31CF58D2A4A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F5A2D09-E72F-43AB-B049-31CF58D2A4A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F5A2D09-E72F-43AB-B049-31CF58D2A4A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79963D6A-99E5-4F42-A9D2-308BBDCD7667}.Debug|Any CPU.ActiveCfg = Debug
+		{79963D6A-99E5-4F42-A9D2-308BBDCD7667}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{829E2333-A3AA-4159-A124-59549E38E12B} = {A28F32D5-4E42-4CD5-9550-AE9B56E613A9}
+		{51CF4CB8-4A39-4149-956F-9C1C52F93133} = {FEEA77F5-239B-4A9D-A9C9-1D9A11607718}
+		{4F5A2D09-E72F-43AB-B049-31CF58D2A4A5} = {FEEA77F5-239B-4A9D-A9C9-1D9A11607718}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC43462C-0664-424E-AEE5-4CBE517B5C7E}
+	EndGlobalSection
+EndGlobal
