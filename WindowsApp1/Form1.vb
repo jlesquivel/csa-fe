@@ -94,7 +94,6 @@ Public Class Form1
                             i += 1
                         Next
 
-
                         Dim esperar As Thread = New Thread(AddressOf EsperarTermine)
                         esperar.Start(doneEvents)
                         '? Ahora espere por este nuevo hilo.
