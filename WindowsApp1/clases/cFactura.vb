@@ -23,6 +23,7 @@ Public Class cFactura
         If creador IsNot Nothing Then
             retorna = creador.CrearDocumentoXML(obtenerDocumento1(idFact), FIRMAR)
         End If
+
         Return retorna
 
     End Function
@@ -230,14 +231,10 @@ Public Class cFactura
             .DocumentosReferencia = New List(Of DocumentoReferenciaSistema)
             }
 
-        'p.DocumentosReferencia.Add(New DocumentoReferencia() With
-        '    {
-        '        .Codigo = "",
-        '        .FechaEmision = DateTime.Now,
-        '        .Numero = "32323232",
-        '        .Razon = "prueba",
-        '        .TipoDoc = "00"
-        '    })
+
+        p.DocumentosReferencia = ReferenciasF(idFact)  ' ////////////////////////// REFERENCIAS
+
+
 
         p.SeccionOtros = New Dictionary(Of String, String)
 
@@ -251,6 +248,34 @@ Public Class cFactura
 
       Return p
    End Function
+
+    Private Function ReferenciasF(idFact As Integer) As List(Of DocumentoReferenciaSistema)
+
+        Dim sqlFact As String = $"select * from [fact.facturaReferencia] where idFactura = {idFact} "
+        Dim factDB = conn.llenaTabla(sqlFact)
+
+        Dim lista As New List(Of DocumentoReferenciaSistema)
+
+        For Each registro In factDB.Rows
+            lista.Add(New DocumentoReferenciaSistema() With
+            {
+                .Codigo = registro.item("codigo"),
+                .FechaEmision = registro.item("FechaEmision"),
+                .Numero = registro.item("Numero"),
+                .Razon = registro.item("Razon"),
+                .TipoDoc = registro.item("TipoDoc")
+            })
+
+        Next
+
+        Return lista
+
+        ' [id] [idFactura] [Referencia] [TipoDoc] [Numero] [FechaEmision] [Codigo] [Razon]
+
+        Throw New NotImplementedException()
+    End Function
+
+
 
     Public Function getTipodocumento(Documento As String) As CR.FacturaElectronica.Shared.EnumeradoresFEL.enmTipoDocumento
         Select Case Documento

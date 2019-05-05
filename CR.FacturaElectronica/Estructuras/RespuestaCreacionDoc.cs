@@ -1,4 +1,5 @@
 ﻿using CR.FacturaElectronica.Entidades;
+using System;
 
 namespace CR.FacturaElectronica
 {
@@ -18,6 +19,7 @@ namespace CR.FacturaElectronica
         public long NuevoConsecutivoSistema;
         public enmEstadoDocumento EstadoDocumento;
         public string archivo;
+        public DateTime FechaEmision;
 
 
     }

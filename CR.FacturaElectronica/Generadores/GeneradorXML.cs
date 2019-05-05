@@ -67,6 +67,7 @@ namespace CR.FacturaElectronica.Generadores
                 lista.Add(new InformacionReferencia
                 {
                     FechaEmision = t.FechaEmision,
+                    Numero =t.Numero,
                     Razon = t.Razon,
                     Codigo = ModFunciones.ObtenerValorEnumerador(t.Codigo, InformacionReferencia.InformacionReferenciaCodigo.Item99),
                     TipoDoc = ModFunciones.ObtenerValorEnumerador(t.TipoDoc, InformacionReferencia.TipoDocumento.Item99)

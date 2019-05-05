@@ -128,7 +128,8 @@ Public Class Form1
 
         Thread.Sleep(5000)
 
-        Dim Sql = $"select top {factParalelas} id,enc_clave from [fact.factura] where confirmacion in ('Accepted','procesando') "
+        Dim Sql = $"select top {factParalelas} id,enc_clave from [fact.factura] 
+                        where confirmacion in ('Accepted','procesando') "
         Dim factDB = conn.llenaTabla(Sql)
 
         Dim sqlActualiza As String = ""
@@ -140,16 +141,25 @@ Public Class Form1
         For Each fila In factDB.Rows
             idFact = fila.item("id")
             clave = fila.item("enc_clave")
-            ActLog($"Factura: {idFact}")
 
             Dim compro = envia.consulta(clave, TK)  ''ok
 
             Dim respuesta As String = envia.jsonRespuesta
             Dim estado As String = envia.estado
+            Dim DetalleMensaje As String = ""
+
+            Dim RH As RespuestaHacienda = Newtonsoft.Json.JsonConvert.DeserializeObject(Of RespuestaHacienda)(respuesta)
+            If RH.respuesta_xml <> "" Then
+                xmlRespuesta = Funciones.DecodeBase64ToXML(RH.respuesta_xml)
+                DetalleMensaje = xmlRespuesta.ChildNodes(1).Item("DetalleMensaje").InnerText
+            End If
 
             Select Case estado
                 Case "aceptado"
-                    Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}',confirmacionMsg = N'{respuesta}' where id = {idFact} "
+
+                    ActLog($"env correo: {idFact}")
+                    Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}',
+                                    confirmacionMsg = N'{ respuesta}' where id = {idFact} "
                     conn.ejecuta(instSQL)
 
                     '' ENVIAR XML, PDF , ACUSE A RECEPTOR
@@ -173,10 +183,16 @@ Public Class Form1
                     Thread.Sleep(5000)
                 Case "rechazado"
                     '' CREAR NOTA DE CREDITO PARA CANCELAR LA FACTURA
+                    Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}',
+                                    confirmacionMsg = N'{respuesta}' where id = {idFact} "
+                    conn.ejecuta(instSQL)
+
+                    Logger.w($" {DetalleMensaje} ")
+                    ActLog($"rechazado: {idFact} -- {DetalleMensaje}")
 
                 Case "error"
                     '' CONTACTAR HACIENDA  
-
+                    ActLog($"¡¡¡¡ ERROR !!! : {idFact}")
             End Select
 
             ActLabel(envia.response)
@@ -356,6 +372,27 @@ Public Class Form1
 #Region " Metodos del Formulario"
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        Dim reintentar = True
+        While reintentar
+            Dim connSQL As New ConexionSQL("Data Source=servidor-bd;Initial Catalog=Facturacion;User ID=colegiosa;Password=C$@123")
+            If Not connSQL.conexionOK Then
+                Dim result = MessageBox.Show("Servidor no econtrado", "Error SQL", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning)
+
+                Select Case result
+                    Case DialogResult.Cancel
+                        reintentar = False
+                End Select
+            Else
+                Exit While
+            End If
+        End While
+
+        If Not reintentar Then
+            Application.Exit()
+        End If
+
+
         SwitchButton1.Visible = False
         SwitchButton2.Value = (My.Settings.emisor_servidor = "api-prod") 'verifica estado y ajusta switch grafico
 
@@ -368,69 +405,71 @@ Public Class Form1
       My.Settings.Save()
 
    End Sub
-   ''' <summary>
-   ''' 
-   ''' </summary>
-   ''' <param name="sender"></param>
-   ''' <param name="e"></param>
-   Private Sub Form1_Shown(sender As Object, e As EventArgs) Handles Me.Shown
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub Form1_Shown(sender As Object, e As EventArgs) Handles Me.Shown
+
+
 
         Cargar_Configuracion()
 
         If CSA_config.apiUsuario.Contains("stag.") Then
-         Dim valor As Boolean = True
-         lbTotal.Visible = valor
-         lbDisponible.Visible = valor
-         lbReinicio.Visible = valor
-      Else
-         Dim valor As Boolean = False
-         lbTotal.Visible = valor
-         lbDisponible.Visible = valor
-         lbReinicio.Visible = valor
-      End If
+            Dim valor As Boolean = True
+            lbTotal.Visible = valor
+            lbDisponible.Visible = valor
+            lbReinicio.Visible = valor
+        Else
+            Dim valor As Boolean = False
+            lbTotal.Visible = valor
+            lbDisponible.Visible = valor
+            lbReinicio.Visible = valor
+        End If
 
-      MicroChart1.Text = "Factura: "
-      MicroChart1.ChartType = eMicroChartType.HundredPercentBar
+        MicroChart1.Text = "Factura: "
+        MicroChart1.ChartType = eMicroChartType.HundredPercentBar
 
-      MicroChart1.HundredPctChartStyle.BarColors(0) = Color.OrangeRed
-      MicroChart1.HundredPctChartStyle.BarColors(1) = Color.LightBlue
-      MicroChart1.HundredPctChartStyle.BarColors(2) = Color.Orange
-      MicroChart1.HundredPctChartStyle.BarColors(3) = Color.LightGreen
+        MicroChart1.HundredPctChartStyle.BarColors(0) = Color.OrangeRed
+        MicroChart1.HundredPctChartStyle.BarColors(1) = Color.LightBlue
+        MicroChart1.HundredPctChartStyle.BarColors(2) = Color.Orange
+        MicroChart1.HundredPctChartStyle.BarColors(3) = Color.LightGreen
 
-      Dim conn As New ConexionSQL(cnf.Item("connSQL"))
-      Dim tabla = conn.llenaTabla("SELECT confirmacion, count(id) cantidad FROM [fact.factura] where confirmacion is not null group by confirmacion")
+        Dim conn As New ConexionSQL(cnf.Item("connSQL"))
+        Dim tabla = conn.llenaTabla("SELECT confirmacion, count(id) cantidad FROM [fact.factura] where confirmacion is not null group by confirmacion")
 
-      For Each reg In tabla.Rows
-         If reg.item("confirmacion") <> "aceptado" Then
+        For Each reg In tabla.Rows
+            If reg.item("confirmacion") <> "aceptado" Then
 
-            MicroChart1.DataPoints.Add(reg.item("cantidad"))
-            MicroChart1.DataPointTooltips.Add(reg.item("confirmacion") & ": " & reg.item("cantidad").ToString)
-         End If
-      Next
+                MicroChart1.DataPoints.Add(reg.item("cantidad"))
+                MicroChart1.DataPointTooltips.Add(reg.item("confirmacion") & ": " & reg.item("cantidad").ToString)
+            End If
+        Next
 
         '' verifica si Hay sistema
         BackgroundWorker1.RunWorkerAsync()
 
         '? //////////////////////////////////////////////////////////////////
         Try   ' Inicia hilo de ejecucion de envio
-         hiloFactura.IsBackground = True
-         hiloFactura.Name = "Genera Facturas"
-         hiloFactura.Start()
-         Me.SwitchButton1.Visible = True
-      Catch ex As Exception
-         MessageBox.Show("Error al cargar Hilo")
-      End Try
+            hiloFactura.IsBackground = True
+            hiloFactura.Name = "Genera Facturas"
+            hiloFactura.Start()
+            Me.SwitchButton1.Visible = True
+        Catch ex As Exception
+            MessageBox.Show("Error al cargar Hilo")
+        End Try
 
-   End Sub
+    End Sub
 
 
 
-   ''' <summary>
-   ''' Evita cerrar la apicacion
-   ''' </summary>
-   ''' <param name="sender"></param>
-   ''' <param name="e"></param>
-   Private Sub Form1_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
+    ''' <summary>
+    ''' Evita cerrar la apicacion
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub Form1_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
       Me.WindowState = FormWindowState.Minimized
       Me.Visible = False
       NotifyIcon1.Visible = True

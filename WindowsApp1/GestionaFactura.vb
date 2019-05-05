@@ -1,9 +1,11 @@
 ﻿Imports System.Threading
 Imports EG.EnviaFactura
 Imports CR.FacturaElectronica
-'Imports EG.CajaHerramientas
-'Imports System.Data.SqlClient
+Imports EG.CajaHerramientas
+Imports System.Data.SqlClient
 Imports System.Net.Http
+Imports System
+
 
 Public Class GestionaFactura
 
@@ -56,10 +58,15 @@ Public Class GestionaFactura
                 rutaArchivos = facturar.rutaArchivos & IIf(facturar.rutaArchivos.EndsWith("\"), "", "\")
 
                 '? ///////////////////////////////////////////////////////////////////////////////////////// Actualiza consecutivo y clave
-                Dim actFact = "UPDATE [fact.factura] SET enc_clave = '$valor' , enc_consecutivo = '$consect' WHERE (id = $idFact)"
+
+                Dim femision As DateTime = DateTime.Now
+
+
+                Dim actFact = "UPDATE [fact.factura] SET enc_clave = '$valor' , enc_consecutivo = '$consect', enc_fecha = CONVERT(DATETIME, '$fechaCreacion')  WHERE (id = $idFact)"
                 actFact = actFact.Replace("$valor", res.ClaveDocCreada)
                 actFact = actFact.Replace("$consect", res.ConsecutivoDocCreado)
                 actFact = actFact.Replace("$idFact", idFact.ToString)
+                actFact = actFact.Replace("$fechaCreacion", res.FechaEmision.ToString("MM/dd/yyyy HH:mm:ss:fff"))
                 conn.ejecuta(actFact)
 
                 '? ////////////////////////////////////////////////////////////////////////////////////////  Genera QR y PDF 
