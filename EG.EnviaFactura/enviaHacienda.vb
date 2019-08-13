@@ -161,9 +161,8 @@ Public Class enviaHacienda
          If TokenHacienda <> "" Then
             Dim enviaFactura As New Comunicacion With {.URL_RECEPCION = configuracion.apiURL}
             enviaFactura.EnvioDatos(TokenHacienda, myRecepcion)    '' ******************    ENVIA
-            response = enviaFactura.response
-
-            estado = enviaFactura.estadoFactura
+                response = enviaFactura.response
+                estado = enviaFactura.estadoFactura
             Select Case enviaFactura.estadoFactura
                Case "recibido"
                   respuestaHacienda += vbCrLf & vbCrLf & enviaFactura.mensajeRespuesta
@@ -205,7 +204,7 @@ Public Class enviaHacienda
             End If
 
             If pTK <> "" Then
-                Dim enviaFactura As New Comunicacion
+                Dim enviaFactura As New Comunicacion With {.URL_RECEPCION = configuracion.apiURL}
                 enviaFactura.ConsultaEstatus(pTK, pclave)
 
                 estado = enviaFactura.estadoFactura

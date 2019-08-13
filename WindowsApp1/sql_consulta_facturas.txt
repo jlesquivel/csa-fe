@@ -1,0 +1,13 @@
+﻿
+DECLARE @ciclo int = 1
+
+WHILE @ciclo <= 7
+BEGIN
+
+SELECT top 5 id, consecutivo, enc_consecutivo, confirmacion, confirmacionMsg 
+FROM [fact.factura]
+ORDER BY id desc
+
+set @ciclo= @ciclo+1
+waitfor delay '00:00:07'
+END

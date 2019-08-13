@@ -6,9 +6,9 @@ namespace CR.FacturaElectronica.Interfaces
 {
     internal interface IEncabezado
     {
-        [XmlAttribute(AttributeName = "schemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
-        string schemaLocation { get; set; }
         string Clave { get; set; }
+
+        string CodigoActividad { get; set; }
         string NumeroConsecutivo { get; set; }
         [XmlIgnore]
         DateTime FechaEmision { get; set; }

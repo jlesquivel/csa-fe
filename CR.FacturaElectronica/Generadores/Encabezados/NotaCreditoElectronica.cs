@@ -10,11 +10,11 @@ namespace CR.FacturaElectronica.Generadores.Encabezados
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaCreditoElectronica")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaCreditoElectronica", IsNullable = false)]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/notaCreditoElectronica")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/notaCreditoElectronica", IsNullable = false)]
     public class NotaCreditoElectronica : IEncabezado
     {
-        private string SchemaLocation = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaCreditoElectronica https://tribunet.hacienda.go.cr/docs/esquemas/2016/v4.2/NotaCreditoElectronica_V4.2.xsd";
+        private string SchemaLocation = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/notaCreditoElectronica https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/notaCreditoElectronica";
 
         [XmlAttribute(AttributeName = "schemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
         public string schemaLocation
@@ -30,6 +30,7 @@ namespace CR.FacturaElectronica.Generadores.Encabezados
         }
 
         public string Clave { get; set; }
+        public string CodigoActividad { get; set; }
         public string NumeroConsecutivo { get; set; }
         [XmlIgnore]
         public DateTime FechaEmision { get; set; }

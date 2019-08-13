@@ -61,10 +61,13 @@ Public Class Firma
             Dim parametros As SignatureParameters = New SignatureParameters
 
             parametros.SignaturePolicyInfo = New SignaturePolicyInfo()
-            parametros.SignaturePolicyInfo.PolicyIdentifier = "https://tribunet.hacienda.go.cr/docs/esquemas/2016/v4.2/Resolucion_Comprobantes_Electronicos_DGT-R-48-2016.pdf"
+            parametros.SignaturePolicyInfo.PolicyIdentifier = "https://tribunet.hacienda.go.cr/docs/esquemas/2016/v4.1/Resolucion_Comprobantes_Electronicos_DGT-R-48-2016.pdf"
             ''La propiedad PolicyHash es la misma para todos, es un cálculo en base al archivo pdf indicado en PolicyIdentifier
             parametros.SignaturePolicyInfo.PolicyHash = "Ohixl6upD6av8N7pEvDABhEL6hM="
+
+
             parametros.SignaturePackaging = SignaturePackaging.ENVELOPED
+
             parametros.DataFormat = New DataFormat()
             parametros.Signer = New FirmaXadesNet.Crypto.Signer(cert)
 

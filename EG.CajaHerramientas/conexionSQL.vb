@@ -19,9 +19,9 @@ Public Class ConexionSQL
 	 Private vServidor As String = "servidor-bd"
 #End If
 	Private seguridadIntegrada As Boolean = True
-    Public vEspera As String = "5"   '' teimpo de de espera en segundos al servidor
-    Private vbd As String = "colegio"
-	Public vusuario As String = ""
+   Public vEspera As String = "5"   '' teimpo de de espera en segundos al servidor
+   Private vbd As String = "colegio"
+   Public vusuario As String = ""
 	Public vpassword As String = ""
 	Private vtabla As String = ""
 	Private vcampos As String = ""

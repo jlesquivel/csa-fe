@@ -19,7 +19,9 @@ namespace CR.FacturaElectronica.Generadores
 
         public string CrearXML(EnumeradoresFEL.enmTipoDocumento tipoDoc)
         {
+
             var encDoc = ResolverEncabezado(tipoDoc);
+            encDoc.CodigoActividad = Encabezado.CodigoActividad;
             encDoc.Clave = Encabezado.Clave;
             encDoc.NumeroConsecutivo = Encabezado.NumeroConsecutivo;
             encDoc.FechaEmision = Encabezado.FechaEmision;
@@ -32,11 +34,7 @@ namespace CR.FacturaElectronica.Generadores
             encDoc.DetalleServicio = Detalles.ToArray();
             encDoc.ResumenFactura = Resumen;
             encDoc.InformacionReferencia = CrearArregloReferencias();
-            encDoc.Normativa = new Normativa
-            {
-                NumeroResolucion = Encabezado.NormativaNombre,
-                FechaResolucion = Encabezado.NormativaFecha
-            };
+         
             encDoc.Otros = CrearSeccionOtros();
             return encDoc.GenerarXML();
 

@@ -15,7 +15,7 @@ Option Explicit On
 Namespace My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0"),  _
+     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.1.0.0"),  _
      Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
     Partial Friend NotInheritable Class MySettings
         Inherits Global.System.Configuration.ApplicationSettingsBase
@@ -56,42 +56,6 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("1000")>  _
-        Public Property peticionesSobran() As Integer
-            Get
-                Return CType(Me("peticionesSobran"),Integer)
-            End Get
-            Set
-                Me("peticionesSobran") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("1000")>  _
-        Public Property petisionesLimite() As Integer
-            Get
-                Return CType(Me("petisionesLimite"),Integer)
-            End Get
-            Set
-                Me("petisionesLimite") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
-        Public Property peticionesReinicio() As String
-            Get
-                Return CType(Me("peticionesReinicio"),String)
-            End Get
-            Set
-                Me("peticionesReinicio") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("1")>  _
         Public Property factParalelas() As Byte
             Get
@@ -99,18 +63,6 @@ Namespace My
             End Get
             Set
                 Me("factParalelas") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
-        Public Property eFacturaConnection() As String
-            Get
-                Return CType(Me("eFacturaConnection"),String)
-            End Get
-            Set
-                Me("eFacturaConnection") = value
             End Set
         End Property
         
@@ -147,6 +99,54 @@ Namespace My
             Get
                 Return CType(Me("FacturacionConnectionString"),String)
             End Get
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property petSobran() As Integer
+            Get
+                Return CType(Me("petSobran"),Integer)
+            End Get
+            Set
+                Me("petSobran") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property petLimite() As Integer
+            Get
+                Return CType(Me("petLimite"),Integer)
+            End Get
+            Set
+                Me("petLimite") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property petReinicio() As String
+            Get
+                Return CType(Me("petReinicio"),String)
+            End Get
+            Set
+                Me("petReinicio") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property eFacturaConnection() As String
+            Get
+                Return CType(Me("eFacturaConnection"),String)
+            End Get
+            Set
+                Me("eFacturaConnection") = value
+            End Set
         End Property
     End Class
 End Namespace

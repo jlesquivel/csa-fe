@@ -12,55 +12,56 @@ Imports EG.CajaHerramientas
 Public Class comprobacion
 
    Private Shared _configuracion As ConfiguracionCreacionDocumentos
-   Public Shared conn As ConexionSQL
+    Public Shared conn As New ConexionSQL($"Data Source=servidor-bd;Initial Catalog=eFactura_sandbox;User ID=sa;Password=123;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False")
 
 
-   Public Shared Sub Main()
+    Public Shared Sub Main()
 
       _configuracion = obtenerConfiguracion1(1)
 
       Dim msgReceptor As MensajeReceptor = New MensajeReceptor()
       With msgReceptor
-         .Clave = "0000000"
-         .NumeroCedulaEmisor = "00000000000"
-         .NumeroCedulaReceptor = "00000000000"
-         .FechaEmisionDoc = Now
+            .Clave = "50606051900300218208000100001010000002698133241671"
+            .NumeroCedulaEmisor = "003002182080"
+            .NumeroCedulaReceptor = "000502690349"
+            .FechaEmisionDoc = Now
          .Mensaje = 1
-         .DetalleMensaje = "000000"
-         .MontoTotalImpuestoSpecified = True
+            .DetalleMensaje = "aceptado"
+            .MontoTotalImpuestoSpecified = True
          .MontoTotalImpuesto = 0
          .TotalFactura = 0
-         .NumeroConsecutivoReceptor = "1234567890"
-      End With
+            .NumeroConsecutivoReceptor = "00100001010000002698"
+        End With
 
-      Dim fXML As String = fcObtenerStringXML(msgReceptor)
+      Dim oGenera = New Mensaje_Receptor.MensajeReceptorProcesador
+      Dim fXML As String = oGenera.fcObtenerStringXML(msgReceptor)
 
       GuardarElXMlParaFirmarlo("clave", fXML)
 
    End Sub
 
 
-   Public Shared Function fcObtenerStringXML(ByVal pvoTiquete As MensajeReceptor) As String
-      Try
-         Dim vloSerializador As XmlSerializer = New XmlSerializer(GetType(MensajeReceptor))
-         Dim vloConfiguraciones As XmlWriterSettings = New XmlWriterSettings()
-         vloConfiguraciones.Encoding = New UnicodeEncoding(False, False)
-         vloConfiguraciones.Indent = True
-         vloConfiguraciones.OmitXmlDeclaration = True
+   'Public Shared Function fcObtenerStringXML(ByVal pvoTiquete As MensajeReceptor) As String
+   '   Try
+   '      Dim vloSerializador As XmlSerializer = New XmlSerializer(GetType(MensajeReceptor))
+   '      Dim vloConfiguraciones As XmlWriterSettings = New XmlWriterSettings()
+   '      vloConfiguraciones.Encoding = New UnicodeEncoding(False, False)
+   '      vloConfiguraciones.Indent = True
+   '      vloConfiguraciones.OmitXmlDeclaration = True
 
-         Using vloEscritor As StringWriter = New StringWriter()
+   '      Using vloEscritor As StringWriter = New StringWriter()
 
-            Using xmlWriter As XmlWriter = XmlWriter.Create(vloEscritor, vloConfiguraciones)
-               vloSerializador.Serialize(xmlWriter, pvoTiquete)
-            End Using
+   '         Using xmlWriter As XmlWriter = XmlWriter.Create(vloEscritor, vloConfiguraciones)
+   '            vloSerializador.Serialize(xmlWriter, pvoTiquete)
+   '         End Using
 
-            Return vloEscritor.ToString()
-         End Using
+   '         Return vloEscritor.ToString()
+   '      End Using
 
-      Catch ex As Exception
-         Throw ex
-      End Try
-   End Function
+   '   Catch ex As Exception
+   '      Throw ex
+   '   End Try
+   'End Function
 
    Private Shared Function GuardarElXMlParaFirmarlo(ByVal clave As String, ByVal xml As String) As String
       Dim ruta = _configuracion.RutaXMLRespaldos
@@ -87,8 +88,8 @@ Public Class comprobacion
 
    Private Shared Function obtenerConfiguracion1(pEmisor As Integer) As ConfiguracionCreacionDocumentos
       Try
-         Dim sql As String = "select * from [conf.Emisores] where idPersona = " & pEmisor.ToString
-         Dim configdb = conn.llenaTabla(sql).Rows(0)
+            Dim sql As String = $"select * from [conf.Emisores] where idPersona = {pEmisor.ToString} "
+            Dim configdb = conn.llenaTabla(sql).Rows(0)
          Dim idEmisor As Integer = configdb.Item("idPersona")
 
 

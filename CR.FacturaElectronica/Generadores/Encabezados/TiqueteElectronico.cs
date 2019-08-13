@@ -10,11 +10,11 @@ namespace CR.FacturaElectronica.Generadores.Encabezados
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/tiqueteElectronico")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/tiqueteElectronico", IsNullable = false)]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/tiqueteElectronico", IsNullable = false)]
     public class TiqueteElectronico : IEncabezado
     {
-        private string SchemaLocation = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/tiqueteElectronico https://tribunet.hacienda.go.cr/docs/esquemas/2016/v4.2/TiqueteElectronico_V4.2.xsd";
+
+          private string SchemaLocation = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/tiqueteElectronico https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/tiqueteElectronico_V.4.3.xsd";
 
         [XmlAttribute(AttributeName = "schemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
         public string schemaLocation
@@ -29,7 +29,9 @@ namespace CR.FacturaElectronica.Generadores.Encabezados
             }
         }
 
+   
         public string Clave { get; set; }
+        public string CodigoActividad { get; set; }
         public string NumeroConsecutivo { get; set; }
         [XmlIgnore]
         public DateTime FechaEmision { get; set; }

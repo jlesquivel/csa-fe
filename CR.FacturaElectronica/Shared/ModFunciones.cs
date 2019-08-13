@@ -91,8 +91,8 @@ namespace CR.FacturaElectronica.Shared
         {
             Type type = valorEnum.GetType();
             FieldInfo info = type.GetField(Enum.GetName(typeof(T), valorEnum));
-            XmlEnumAttribute att = (XmlEnumAttribute)info.GetCustomAttributes(typeof(XmlEnumAttribute), false)[0];
-            return att.Name;
+            //XmlEnumAttribute att = (XmlEnumAttribute)info.GetCustomAttributes(typeof(XmlEnumAttribute), false)[0];
+            return info.Name;
         }
     }
          

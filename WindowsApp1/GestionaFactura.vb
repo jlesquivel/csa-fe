@@ -26,7 +26,8 @@ Public Class GestionaFactura
    Private cnf As DataRow
 
 
-   Public Sub New(_emisor As confComunicacion, _idFactura As Integer, pcnf As DataRow, pTK As String, doneEvent As ManualResetEvent)
+   Public Sub New(_emisor As confComunicacion, _idFactura As Integer,
+                  pcnf As DataRow, pTK As String, doneEvent As ManualResetEvent)
 
       cnf = pcnf     '' carga configuracion desde BD , recivido por el parametro
 
@@ -38,7 +39,7 @@ Public Class GestionaFactura
       _doneEvent = doneEvent
    End Sub
 
-    Public Sub GeneraFactura(threadContext As Object)
+   Public Sub GeneraFactura(threadContext As Object)
 
         Dim threadIndex As Integer = CType(threadContext, Integer)
         Dim res As RespuestaCreacionDoc
@@ -50,7 +51,10 @@ Public Class GestionaFactura
 
             '? /////////////////////////////////////////////////////////////////////////////////////////////// GENERA XML
 
-            Dim facturar As New cFactura With {.rutaArchivos = cnf.item("rutaArch")}
+            Dim facturar As New cFactura With {
+                    .rutaArchivos = cnf.Item("rutaArch"),
+                    .emisorDB = cnf
+                }
             res = facturar.GenerarXML(idFact)                       '*******************  GENERA XML
 
             If res.ClaveDocCreada IsNot Nothing Then
@@ -66,11 +70,17 @@ Public Class GestionaFactura
                 actFact = actFact.Replace("$valor", res.ClaveDocCreada)
                 actFact = actFact.Replace("$consect", res.ConsecutivoDocCreado)
                 actFact = actFact.Replace("$idFact", idFact.ToString)
-                actFact = actFact.Replace("$fechaCreacion", res.FechaEmision.ToString("MM/dd/yyyy HH:mm:ss:fff"))
-                conn.ejecuta(actFact)
+            actFact = actFact.Replace("$fechaCreacion", res.FechaEmision.ToString("dd/MM/yyyy HH:mm:ss:fff"))
 
-                '? ////////////////////////////////////////////////////////////////////////////////////////  Genera QR y PDF 
-                Dim pdf = New cPDF With {.clave = res.ClaveDocCreada}
+            Try
+               conn.ejecuta(actFact)
+            Catch ex As Exception
+               Throw ex
+            End Try
+
+
+            '? ////////////////////////////////////////////////////////////////////////////////////////  Genera QR y PDF 
+            Dim pdf = New cPDF With {.clave = res.ClaveDocCreada}
                 pdf.salvarQR(idFact)
                 pdf.GenerarPDf(rutaArchivos, res.ClaveDocCreada, idFact, My.Settings.emisor_servidor)
             End If

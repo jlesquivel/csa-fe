@@ -8,5 +8,14 @@
     <Setting Name="configuracion" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="eFacturaConnection" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Data Source=servidor-bd;Initial Catalog=eFactura;Persist Security Info=True;User ID=colegiosa;Password=C$@123</Value>
+    </Setting>
+    <Setting Name="emisor" Type="System.String" Scope="User">
+      <Value Profile="(Default)">3002182080</Value>
+    </Setting>
+    <Setting Name="emisor_servidor" Type="System.String" Scope="User">
+      <Value Profile="(Default)">api-stag</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

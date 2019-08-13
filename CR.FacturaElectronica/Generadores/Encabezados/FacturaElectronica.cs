@@ -7,17 +7,20 @@ using System.Xml.Serialization;
 namespace CR.FacturaElectronica.Generadores.Encabezados
 {
     /// <comentarios/>
+    /// 
+
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.1")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/facturaElectronica")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/facturaElectronica", IsNullable = false)]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/facturaElectronica")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/facturaElectronica", IsNullable = false)]
   
     public class FacturaElectronica : IEncabezado
     {
-        
-        private string SchemaLocation = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/facturaElectronica https://tribunet.hacienda.go.cr/docs/esquemas/2016/v4.2/FacturaElectronica_V.4.2.xsd";
+
+
+        private string SchemaLocation = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/facturaElectronica https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/facturaElectronica_V.4.3.xsd";
 
         [XmlAttribute(AttributeName = "schemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
         public string schemaLocation
@@ -32,7 +35,10 @@ namespace CR.FacturaElectronica.Generadores.Encabezados
             }
         }
 
+
         public string Clave { get; set; }
+
+        public string CodigoActividad { get; set; }
         public string NumeroConsecutivo { get; set; }
 
         [XmlIgnore]

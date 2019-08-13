@@ -1,4 +1,5 @@
 ﻿
+
 Imports CR.FacturaElectronica
 Imports CR.FacturaElectronica.Entidades
 Imports CR.FacturaElectronica.Interfaces
@@ -7,8 +8,102 @@ Imports EG.CajaHerramientas
 Imports System.IO
 Imports System.Text.RegularExpressions
 Imports System.Globalization
-Imports EG.EnviaFactura
 
+Imports EG.EnviaFactura
+Imports System.Net.Http
+
+
+
+
+Module genFE
+
+    Dim cnf As DataRow
+    Dim CSA_config As confComunicacion
+
+    Dim conn As ConexionSQL
+
+
+
+    Sub Main()
+
+        Console.WriteLine("INICIADO Genera Factura Electronica")
+
+        Dim TK As String = ""
+        Cargar_Configuracion()
+
+
+
+        '?//// ++++++++++++++++++++++++++++++++++++++  GENERA ARCHIVO XML
+        Dim res As RespuestaCreacionDoc
+        Dim facturar As New cFactura With {.rutaArchivos = "D:\", .emisorDB = cnf}
+
+        res = facturar.GenerarXML(4798)
+
+
+        '?//// ++++++++++++++++++++++++++++++++++++++  TOKEN
+
+        'Dim iTokenHacienda As New TokenHacienda
+        'If TK = "" Or iTokenHacienda.TokenExpirado() Then
+
+        '    iTokenHacienda.GetTokenHacienda(CSA_config.apiUsuario, CSA_config.apiClave)
+
+        '    If iTokenHacienda.isCorrecto Then
+        '        TK = iTokenHacienda.accessToken
+        '        Console.WriteLine($"Token expira en : {iTokenHacienda.tokenExpiraEn()}")
+        '    Else
+        '        TK = ""
+        '    End If
+        'End If
+
+
+        ''?//// ++++++++++++++++++++++++++++++++++++++ ENVIA
+
+        'Dim envia = New enviaHacienda(res.archivo, CSA_config, TK)
+
+        'Dim respuesta As String = envia.Procesa()
+        'Dim response As HttpResponseMessage = envia.response
+        'Dim resultado As String = response.ReasonPhrase
+
+        'respuesta = envia.respuestaHacienda
+
+        ''?//// ++++++++++++++++++++++++++++++++  CONSULTA ESTADO
+
+
+        If res.ClaveDocCreada IsNot Nothing Then
+            Console.WriteLine("CREAdo*********")
+        End If
+    End Sub
+
+
+
+    Sub Cargar_Configuracion()
+
+
+        Dim connSQL As New ConexionSQL("Data Source=servidor-bd;Initial Catalog=Facturacion;User ID=colegiosa;Password=C$@123")
+        Dim sqlconf As String = $"SELECT Servidores.*,Emisores.* FROM Emisores INNER JOIN Servidores ON Emisores.id = Servidores.emisor WHERE numeroID = '{My.Settings.emisor}' AND ClientID = '{ My.Settings.emisor_servidor}' "
+
+        Dim tabladb = connSQL.llenaTabla(sqlconf)
+        If tabladb IsNot Nothing Then
+
+            cnf = tabladb.Rows(0)
+
+            CSA_config = New confComunicacion With {
+                  .apiUsuario = cnf.Item("usuario"),
+                  .apiClave = cnf.Item("clave"),
+                  .apiURL = cnf.Item("API"),
+                  .apiIDP = cnf.Item("IDP"),
+                  .llaveRuta = cnf.Item("rutaLLave"),
+                  .llavePIN = cnf.Item("pinLLave")
+               }
+            conn = New ConexionSQL(cnf.Item("connSQL"))
+
+        Else
+            Console.WriteLine("ERROR :" & "configuracion no cargada")
+        End If
+
+    End Sub
+
+End Module
 
 
 
@@ -365,3 +460,4 @@ Public Class cFactura
 
 
 End Class
+

@@ -6,14 +6,15 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{BA151700-8469-416D-9617-AB56B372569A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>ConsoleApp1.Module2</StartupObject>
+    <StartupObject>ConsoleApp1.genFE</StartupObject>
     <RootNamespace>ConsoleApp1</RootNamespace>
     <AssemblyName>ConsoleApp1</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Console</MyType>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -89,16 +90,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="comprobacion.vb" />
-    <Compile Include="config_JSON.vb" />
-    <Compile Include="eFactura.vb">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>eFactura.rpt</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Fibonacci.vb" />
-    <Compile Include="Module2_VerificaBD.vb" />
+    <Compile Include="genMensajeReceptor.vb" />
     <Compile Include="Module1.vb" />
+    <Compile Include="genFE.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -114,14 +108,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="pruebaPDF.vb" />
-    <Compile Include="prueba_EnviaHda.vb" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="eFactura.rpt">
-      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
-      <LastGenOutput>eFactura.vb</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>

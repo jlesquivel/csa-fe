@@ -33,6 +33,7 @@ namespace CR.FacturaElectronica
 
                 docParams.Encabezado.FechaEmision = DateTime.Now;
                 docParams.Encabezado.Emisor = _configuracion.EmisorInformacion;
+           
                 docParams.Encabezado.NumeroConsecutivo = GenerarConsecutivo(docParams.Sucursal, docParams.Terminal,
                     docParams.ConsecutivoSistema, docParams.TipoDocumento);
                 docParams.Encabezado.Clave = GenerarClave(docParams.Encabezado.NumeroConsecutivo, docParams.Encabezado.FechaEmision,
@@ -40,7 +41,8 @@ namespace CR.FacturaElectronica
 
                 var creadorXml = new GeneradorXML();
 
-                creadorXml.Encabezado = docParams.Encabezado;
+           
+                creadorXml.Encabezado = docParams.Encabezado;              
                 creadorXml.DocsReferencia = docParams.DocumentosReferencia == null ? null : docParams.DocumentosReferencia.ToArray();
                 creadorXml.Detalles = new LineasDetalleParser().ParsearLineas(docParams.LineasDetalle);
                 creadorXml.Resumen = docParams.Resumen;

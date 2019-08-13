@@ -10,27 +10,15 @@ namespace CR.FacturaElectronica.Generadores.Encabezados
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaDebitoElectronica")]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaDebitoElectronica", IsNullable = false)]
 
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/notaDebitoElectronica")]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "https://cdn.comprobanteselectronicos.go.cr/xml-schemas/v4.3/notaDebitoElectronica", IsNullable = false)]
+    
     public class NotaDebitoElectronica : IEncabezado
     {
-        private string SchemaLocation = "https://tribunet.hacienda.go.cr/docs/esquemas/2017/v4.2/notaDebitoElectronica https://tribunet.hacienda.go.cr/docs/esquemas/2016/v4.2/NotaDebitoElectronica.xsd";
-
-        [XmlAttribute(AttributeName = "schemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
-        public string schemaLocation
-        {
-            get
-            {
-                return SchemaLocation;
-            }
-            set
-            {
-                SchemaLocation = value;
-            }
-        }
-
+       
         public string Clave { get; set; }
+        public string CodigoActividad { get; set; }
         public string NumeroConsecutivo { get; set; }
         [XmlIgnore]
         public DateTime FechaEmision { get; set; }

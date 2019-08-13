@@ -11,7 +11,7 @@
     <AssemblyName>gestionaFacturas</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <PublishUrl>publish\</PublishUrl>
@@ -29,6 +29,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -88,15 +89,6 @@
       <HintPath>..\..\FactElectronicaCR-envia\FactElectronicaCR-envia\FacturaElectronicaCR_VB\bin\Debug\FirmaXadesNet.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.5.3.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.3.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.5.3.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Xades, Version=1.0.7.0, Culture=neutral, PublicKeyToken=52bc0bff8bc72d48, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\OneDrive\Projects\CSA\CSA_FactElect\CR.FacturaElectronica\EG.EnviaFactura\COMPONENTES\Librerias\Microsoft.Xades.dll</HintPath>
@@ -115,9 +107,6 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Common, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Drawing.Common.4.5.0\lib\net461\System.Drawing.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.5.3.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
@@ -149,6 +138,7 @@
     <Compile Include="clases\cConsulta.vb" />
     <Compile Include="clases\cCorreo.vb" />
     <Compile Include="clases\cFactura.vb" />
+    <Compile Include="clases\cMensajeReceptor.vb" />
     <Compile Include="clases\cPDF.vb" />
     <Compile Include="eFactura.vb">
       <DependentUpon>eFactura.rpt</DependentUpon>
@@ -162,6 +152,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>eFacturaDataSet.xsd</DependentUpon>
     </Compile>
+    <Compile Include="GestionaMensajeReceptor.vb" />
     <Compile Include="modelos\gometa_status.vb" />
     <Compile Include="modelos\IConfiguracion.vb" />
     <Compile Include="ucEmisor.Designer.vb">
@@ -281,6 +272,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="purchase-order-white.ico" />
+    <Content Include="sql_consulta_facturas.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

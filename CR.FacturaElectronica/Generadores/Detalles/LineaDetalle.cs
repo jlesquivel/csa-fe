@@ -15,7 +15,7 @@ namespace CR.FacturaElectronica.Generadores.Detalles
         [System.Xml.Serialization.XmlElementAttribute(DataType = "positiveInteger")]
         public string NumeroLinea { get; set; }
 
-        [System.Xml.Serialization.XmlElementAttribute("Codigo")]
+        [System.Xml.Serialization.XmlElementAttribute("CodigoComercial")]
         public CodigoType[] Codigo { get; set; }
 
         public decimal Cantidad { get; set; }

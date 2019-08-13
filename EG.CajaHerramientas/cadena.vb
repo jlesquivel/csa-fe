@@ -30,4 +30,19 @@ Public Class cadena
     End Function
 
 
+    Public Function SeparaPorAncho(ByVal s As String, ByVal widths As Integer()) As String()
+        Dim ret As String() = New String(widths.Length - 1) {}
+        Dim c As Char() = s.ToCharArray()
+        Dim startPos As Integer = 0
+
+        For i As Integer = 0 To widths.Length - 1
+            Dim width As Integer = widths(i)
+            ret(i) = New String(c.Skip(startPos).Take(width).ToArray())
+            startPos += width
+        Next
+
+        Return ret
+    End Function
+
+
 End Class

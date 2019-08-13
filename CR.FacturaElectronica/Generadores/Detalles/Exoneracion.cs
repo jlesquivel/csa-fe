@@ -12,9 +12,9 @@ namespace CR.FacturaElectronica.Generadores.Detalles
         public string NumeroDocumento { get; set; }
         public string NombreInstitucion { get; set; }
         public DateTime FechaEmision { get; set; }
-        public decimal MontoImpuesto { get; set; }
+        public decimal MontoExoneracion { get; set; }
         [System.Xml.Serialization.XmlElementAttribute(DataType = "integer")]
-        public string PorcentajeCompra { get; set; }
+        public string PorcentajeExoneracion { get; set; }
 
         [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.1")]
         [System.SerializableAttribute()]
@@ -38,6 +38,12 @@ namespace CR.FacturaElectronica.Generadores.Detalles
             /// <comentarios/>
             [System.Xml.Serialization.XmlEnumAttribute("05")]
             Item05,
+
+            [System.Xml.Serialization.XmlEnumAttribute("06")]
+            Item06,
+
+            [System.Xml.Serialization.XmlEnumAttribute("07")]
+            Item07,
 
             /// <comentarios/>
             [System.Xml.Serialization.XmlEnumAttribute("99")]

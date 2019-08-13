@@ -11,7 +11,6 @@ Public Class cCorreo
 
     ''TODO eliminar este variable cuando este en produccion
     Public para As String = "csalib.web@gmail.com"
-
     Dim conn As New ConexionSQL(My.Settings.eFacturaConnection)
 
 
@@ -80,8 +79,11 @@ Public Class cCorreo
             End If
 
         Catch Emailex As SmtpFailedRecipientsException
+
+            Logger.e("Error cCargarFTP.enviar", Emailex, New StackFrame(True))
+
             statusEnvio = "Error :" & Emailex.Message
-            Throw (New Exception(Emailex.Message & " >>> " & Emailex.StackTrace.ToString))
+            'Throw (New Exception(Emailex.Message & " >>> " & Emailex.StackTrace.ToString))
         End Try
 
 

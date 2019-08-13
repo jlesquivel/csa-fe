@@ -72,6 +72,7 @@
     <Compile Include="Entidades\Procesos\TokenDto.cs" />
     <Compile Include="Estructuras\RespuestaCreacionDoc.cs" />
     <Compile Include="Generadores\Detalles\Codigo.cs" />
+    <Compile Include="Generadores\Detalles\CodigoMoneda.cs" />
     <Compile Include="Generadores\Detalles\Emisor.cs" />
     <Compile Include="Generadores\Detalles\Enumeradores.cs" />
     <Compile Include="Generadores\Detalles\Exoneracion.cs" />
@@ -120,9 +121,6 @@
   <ItemGroup>
     <None Include="config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Generadores\Mensaje_Receptor\MensajeReceptor_4.2.xsd">
-      <SubType>Designer</SubType>
     </None>
     <None Include="librerias\config.json" />
     <None Include="packages.config">

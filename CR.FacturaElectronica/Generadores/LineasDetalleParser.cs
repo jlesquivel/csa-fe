@@ -17,7 +17,8 @@ namespace CR.FacturaElectronica.Generadores
             var cont = 0;
             LineaDetalle lnFel;
             foreach (var linea in lineasSistema)
-            {
+            {                            
+
                 lnFel = new LineaDetalle
                 {
                     Cantidad = linea.Cantidad,
@@ -52,11 +53,16 @@ namespace CR.FacturaElectronica.Generadores
             var imp = new List<Impuesto>();
             linea.Impuesto.ForEach(i =>
             {
-                imp.Add(new Impuesto
-                {
-                    Monto = i.Monto, 
-                    Tarifa = i.Tarifa, 
+                imp.Add(new Impuesto    
+                {                    
                     Codigo = ModFunciones.ObtenerValorEnumerador(i.Codigo, Impuesto.ImpuestoCodigo.Item99),
+                    CodigoTarifa = ModFunciones.ObtenerValorEnumerador(i.CodigoTarifa, Impuesto.ImpuestoTypeCodigoTarifa.Item01)  ,    
+                    Tarifa = i.Tarifa,
+
+                    FactorIVASpecified = i.FactorIVA>0,
+                    FactorIVA =  i.FactorIVA,     
+                    
+                    Monto = i.Monto,                    
                     Exoneracion = ParsearExoneracion(i.Exoneracion)
                 });
             });
@@ -69,10 +75,10 @@ namespace CR.FacturaElectronica.Generadores
             var exo = new Exoneracion
             {
                 FechaEmision = exoSis.FechaEmision,
-                MontoImpuesto = exoSis.MontoImpuesto,
+                MontoExoneracion = exoSis.MontoExoneracion,
                 NombreInstitucion = exoSis.NombreInstitucion,
                 NumeroDocumento = exoSis.NumeroDocumento,
-                PorcentajeCompra = exoSis.PorcentajeCompra,
+                PorcentajeExoneracion = exoSis.PorcentajeExoneracion,
                 TipoDocumento = ModFunciones.ObtenerValorEnumerador(exoSis.TipoDocumento, Exoneracion.ExoneracionTipoDoc.Item99)
             };
             return exo;

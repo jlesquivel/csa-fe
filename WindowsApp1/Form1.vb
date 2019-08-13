@@ -4,7 +4,6 @@ Imports DevComponents.DotNetBar
 Imports System.IO
 Imports System.Net.Http
 Imports System.Threading
-Imports System.IdentityModel.Tokens.Jwt
 Imports Newtonsoft.Json
 Imports EG.EnviaFactura
 
@@ -29,22 +28,27 @@ Public Class Form1
    Dim emisor As Integer = 1
    Dim emisorModo As String = ""
 
+   Dim _CicloEnvio = False
+   Dim _FinHiloEnvio = False
+
+
    Public Property cnf As DataRow
 
 
-    '*******************************************************************
+   '! ########################################################################
+   '! ########################################################################
+
 #Region "Activa Hilo Procesa Facturas"
 
-    Sub GenerarFactura()
+   Sub GenerarFactura()
 
-        Dim idFact As Integer
-        Dim TK As String = ""
-        Dim TKexpired As Boolean = True
-        Dim iTokenHacienda As New TokenHacienda
+      Dim TK As String = ""
+      Dim TKexpired As Boolean = True
+      Dim iTokenHacienda As New TokenHacienda
 
-        Dim factParalelas As Integer = cnf.Item("factParalelas")
+      Dim factParalelas As Integer = cnf.Item("factParalelas")
 
-        While True
+      While _CicloEnvio
 
             Try
                 If Not HaySistemas() Then
@@ -59,60 +63,43 @@ Public Class Form1
                     Dim sql As String = $"select top {factParalelas} id from [fact.factura] where enc_clave is null  OR (enc_clave IS NOT NULL AND confirmacion IS NULL)"
                     Dim factDB = conn.llenaTabla(sql)
 
-                    Dim facturar As New cFactura With {.rutaArchivos = cnf.Item("rutaArch")}
-
                     '?//// token
-                    If TK = "" Or TokenExpirado(TK) Then
+                    If TK = "" Or iTokenHacienda.TokenExpirado() Then
                         ActLog("Solicitando Token *****")
                         iTokenHacienda.GetTokenHacienda(CSA_config.apiUsuario, CSA_config.apiClave)
 
-                        TK = iTokenHacienda.accessToken
-                        ActLog($"Token expira en : {tokenExpiraEn(TK)}")
+                        If iTokenHacienda.isCorrecto Then
+
+                            TK = iTokenHacienda.accessToken
+                            ActLog($"Token expira en : {iTokenHacienda.tokenExpiraEn()}")
+                        Else
+                            '!  ERRRO AL OBTENER TOKEN
+                            ActLog($"Token ERROR : { iTokenHacienda.accessToken}")
+
+                            TK = ""
+                            Thread.Sleep(60000)
+                        End If
                     End If
 
-                    '! recorrer tabla y generar cada archivo
-                    If factDB.Rows.Count > 0 Then
 
-                        Dim consultas As Integer = factDB.Rows.Count
+                    If iTokenHacienda.isCorrecto Then
 
-                        Dim doneEvents(consultas - 1) As ManualResetEvent
-                        Dim hilosArray(consultas - 1) As GestionaFactura
+                        If factDB.Rows.Count > 0 Then
+                            '! Envia Facturas
+                            envia_facturas(factDB, TK)
 
-                        ActLog($"Grupo de {factDB.Rows.Count} facturas...")
+                            cosulta_estado_factura(factParalelas, TK)
+                        Else
 
-                        Dim i As Integer = 0
-                        For Each fila In factDB.Rows
-                            idFact = fila.item("id")
-                            ActLog($"factura: {idFact}")
+                            'cosulta_estado_factura(factParalelas, TK)
 
-                            doneEvents(i) = New ManualResetEvent(False)
-                            Dim f As GestionaFactura
-                            f = New GestionaFactura(CSA_config, idFact, cnf, TK, doneEvents(i))
-                            hilosArray(i) = f
-                            ThreadPool.QueueUserWorkItem(AddressOf f.GeneraFactura, i)
-                            i += 1
-                        Next
+                            '! CONFIRMA  LAS FACTURAS RECIBIDAS
 
-                        Dim esperar As Thread = New Thread(AddressOf EsperarTermine)
-                        esperar.Start(doneEvents)
-                        '? Ahora espere por este nuevo hilo.
-                        esperar.Join()
+                            'ActLog($"CONFIRMA  LAS FACTURAS RECIBIDAS ")
+                            'confirma_factura_recividas(cnf, TK)
 
-                        '? Muestra los resultados
-                        For i = 0 To consultas - 1
-                            Dim f As GestionaFactura = hilosArray(i)
-                            ActLog($"# {f.idFact} = {f.resultado} " &
-                                  IIf(f.MensajeError.Length > 0, $", error: {f.MensajeError}", ""))
-
-                            ActLabel(f.response)
-                        Next
-                        ActLog(". . . . . . . ")
-
-                    Else
-
-                        revisa_estado_recepcion(factParalelas, TK)
+                        End If
                     End If
-
                 End If
 
             Catch ex As Exception
@@ -120,126 +107,253 @@ Public Class Form1
                 'Throw New Exception(ex.Message)
                 Thread.Sleep(5000)
             End Try
+
+
         End While
 
-    End Sub
+   End Sub
 
-    Private Sub revisa_estado_recepcion(factParalelas As Integer, TK As String)
+   Private Sub confirma_factura_recividas(cnf As DataRow, TK As String)
 
-        Thread.Sleep(5000)
+        'TODO Hay que obtener los datos dela BD con la informacion de idMensaje
+
+        Dim Sql = $"SELECT * FROM [dbo].[msj.Receptor] WHERE clave is NULL"
+        Dim MRdb = conn.llenaTabla(Sql)
+
+      Dim oMR As New GestionaMensajeReceptor(CSA_config, cnf, TK)
+      For Each fila In MRdb.Rows
+
+         Dim idMR_db = fila.item("id")
+         oMR.EnviaMensajeReceptor(idMR_db)
+
+         ActLog($"Mensaje Receptor: {fila.item("idMensajeReceptor")}")
+      Next
+
+      oMR = Nothing
+   End Sub
+
+   ''' <summary>
+   ''' Procesa las factura que se deben enviar a Hacienda
+   ''' </summary>
+   ''' <param name="pFactura"> Es un DataTable que contiene las factura que se deben enviar </param>
+   ''' <param name="TK"></param>
+   Private Sub envia_facturas(pFactura As DataTable, TK As String)
+
+      Dim consultas As Integer = pFactura.Rows.Count
+      Dim idFact As Integer
+
+
+      Dim doneEvents(consultas - 1) As ManualResetEvent
+      Dim hilosArray(consultas - 1) As GestionaFactura
+
+      ActLog($"Grupo de {pFactura.Rows.Count} facturas...")
+
+      Dim i As Integer = 0
+      For Each fila In pFactura.Rows
+         idFact = fila.item("id")
+         ActLog($"factura: {idFact}")
+
+         doneEvents(i) = New ManualResetEvent(False)
+         Dim f As GestionaFactura
+         f = New GestionaFactura(CSA_config, idFact, cnf, TK, doneEvents(i))
+         hilosArray(i) = f
+         ThreadPool.QueueUserWorkItem(AddressOf f.GeneraFactura, i)
+         i += 1
+      Next
+
+      Dim esperar As Thread = New Thread(AddressOf EsperarTermine)
+      esperar.Start(doneEvents)
+      '? Ahora espere por este nuevo hilo.
+      esperar.Join()
+
+      '? Muestra los resultados
+      For i = 0 To consultas - 1
+         Dim f As GestionaFactura = hilosArray(i)
+         ActLog($"# {f.idFact} = {f.resultado} " &
+                      IIf(f.MensajeError.Length > 0, $", error: {f.MensajeError}", ""))
+
+         ActLabel(f.response)
+      Next
+      ActLog(". . . . . . . ")
+   End Sub
+
+
+   Private Sub cosulta_estado_factura(factParalelas As Integer, TK As String)
+
+        Thread.Sleep(6000)
 
         Dim Sql = $"select top {factParalelas} id,enc_clave from [fact.factura] 
-                        where confirmacion in ('Accepted','procesando') "
+                        where confirmacion in ('Accepted','procesando') and confirmacionMsg is null"
         Dim factDB = conn.llenaTabla(Sql)
 
-        Dim sqlActualiza As String = ""
+      Dim sqlActualiza As String = ""
 
-        Dim clave As String = ""
-        Dim envia = New enviaHacienda(CSA_config)
+      Dim clave As String = ""
+      Dim envia = New enviaHacienda(CSA_config)
+      Dim comprobante = New enviaHacienda(CSA_config)
         Dim idFact
 
+        If factDB.Rows.Count > 0 Then
+            ActLog($" REVISA ESTADOS DE RECEPCION ")
+        End If
+
         For Each fila In factDB.Rows
-            idFact = fila.item("id")
-            clave = fila.item("enc_clave")
+         idFact = fila.item("id")
+         clave = fila.item("enc_clave")
 
-            Dim compro = envia.consulta(clave, TK)  ''ok
+         Dim compro = envia.consulta(clave, TK)  ''ok
+         Dim respuesta As String = envia.jsonRespuesta
 
-            Dim respuesta As String = envia.jsonRespuesta
+         If respuesta <> "" Then
+
             Dim estado As String = envia.estado
             Dim DetalleMensaje As String = ""
+            Dim instSQL As String = ""
+
+            Dim cadena As New EG.CajaHerramientas.cadena
+
+            Dim camposClave = cadena.SeparaPorAncho(clave, {3, 2, 2, 2, 12, 20, 1, 8})
+            Dim campoConsecutivo = cadena.SeparaPorAncho(camposClave(5), {3, 5, 2, 10})
+            Dim tipoDoc = campoConsecutivo(2)
 
             Dim RH As RespuestaHacienda = Newtonsoft.Json.JsonConvert.DeserializeObject(Of RespuestaHacienda)(respuesta)
             If RH.respuesta_xml <> "" Then
-                xmlRespuesta = Funciones.DecodeBase64ToXML(RH.respuesta_xml)
-                DetalleMensaje = xmlRespuesta.ChildNodes(1).Item("DetalleMensaje").InnerText
+               xmlRespuesta = Funciones.DecodeBase64ToXML(RH.respuesta_xml)
+               DetalleMensaje = xmlRespuesta.ChildNodes(1).Item("DetalleMensaje").InnerText
             End If
 
+
             Select Case estado
-                Case "aceptado"
+               Case "aceptado"
 
-                    ActLog($"env correo: {idFact}")
-                    Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}',
-                                    confirmacionMsg = N'{ respuesta}' where id = {idFact} "
-                    conn.ejecuta(instSQL)
+                  Select Case tipoDoc
+                     Case "01", "04"
+                        comprobante.comprobante(clave, TK)
+                        ActLog($"env correo: {idFact}")
+                        instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}'
+                                    ,confirmacionMsg = N'{ respuesta}' 
+                                    ,acuse = N'{ comprobante.jsonRespuesta}' 
+                                    where id = {idFact} "
+                        conn.ejecuta(instSQL)
+                     Case "02", "03"
 
-                    '' ENVIAR XML, PDF , ACUSE A RECEPTOR
-                    '' cargar el archivo PDF al servidor web CSALIB.ORG
+                        Dim clave_ref = Ultim_DocRef(idFact)
+                        Dim idFact_doc = Ultim_idFact(idFact)
 
-                    Dim ftpCSALIB As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
-                    Dim ftpCSALIB2 As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
+                        comprobante.comprobante(clave_ref, TK)
 
-                    Dim ruta = cnf.Item("rutaArch")
-                    ruta = ruta & IIf(ruta.EndsWith("\"), "", "\")
+                        ActLog($"Act comprobante NC o ND: {idFact_doc}")
+                        instSQL = $"UPDATE [fact.factura] SET acuse = N'{ comprobante.jsonRespuesta}' 
+                                    where id = {idFact_doc} "
+                        conn.ejecuta(instSQL)
 
-                    ftpCSALIB.enviar(ruta & clave & ".xml")
-                    ftpCSALIB2.enviar(ruta & clave & ".pdf")
+                        instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}' where id = {idFact} "
+                        conn.ejecuta(instSQL)
 
-                    ftpCSALIB = Nothing
-                    ftpCSALIB2 = Nothing
+                  End Select
 
-                    EnviaCorreo(idFact, ruta, clave)
 
-                Case "procesando"
-                    Thread.Sleep(5000)
-                Case "rechazado"
-                    '' CREAR NOTA DE CREDITO PARA CANCELAR LA FACTURA
-                    Dim instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}',
+                  '' ENVIAR XML, PDF , ACUSE A RECEPTOR
+                  '' cargar el archivo PDF al servidor web CSALIB.ORG
+
+                  Dim ftpCSALIB As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
+                  Dim ftpCSALIB2 As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
+
+                  Dim ruta = cnf.Item("rutaArch")
+                  ruta = ruta & IIf(ruta.EndsWith("\"), "", "\")
+
+                  ftpCSALIB.enviar(ruta & clave & ".xml")
+                  ftpCSALIB2.enviar(ruta & clave & ".pdf")
+
+                  ftpCSALIB = Nothing
+                  ftpCSALIB2 = Nothing
+
+                  EnviaCorreo(idFact, ruta, clave)
+
+               Case "procesando"
+                  Thread.Sleep(5000)
+               Case "rechazado"
+
+
+                        Select Case tipoDoc
+                     Case "01"
+                        'instSQL = $"EXECUTE [dbo].[FE_anula] {idFact} "
+                        'conn.ejecuta(instSQL)
+                            Case "02"
+                     Case "03"
+                     Case "04"
+                     Case "05"
+                  End Select
+
+                  instSQL = $"UPDATE [fact.factura] SET confirmacion = '{estado}',
                                     confirmacionMsg = N'{respuesta}' where id = {idFact} "
-                    conn.ejecuta(instSQL)
+                  conn.ejecuta(instSQL)
 
-                    Logger.w($" {DetalleMensaje} ")
-                    ActLog($"rechazado: {idFact} -- {DetalleMensaje}")
+                  Logger.w($" {DetalleMensaje} ")
+                  ActLog($"rechazado: {idFact} -- {DetalleMensaje}")
 
-                Case "error"
-                    '' CONTACTAR HACIENDA  
-                    ActLog($"¡¡¡¡ ERROR !!! : {idFact}")
+               Case "error"
+                  '' CONTACTAR HACIENDA  
+                  Logger.w($" {DetalleMensaje} ")
+                  ActLog($"¡¡¡¡ ERROR !!! : {idFact}")
             End Select
+         End If
 
-            ActLabel(envia.response)
-        Next
-    End Sub
-
-    Function EnviaCorreo(factura As Integer, ruta As String, clave As String) As String
-        Try
-            '? Enviar por correo el archivo 
-            Dim correo As New cCorreo With {.cnf = cnf}
-            correo.enviar(factura, ruta, clave, CSA_config)
-            Return correo.statusEnvio
-
-        Catch ex As Exception
-            Throw
-        End Try
-
-    End Function
+         ActLabel(envia.response)
+      Next
+   End Sub
 
 
-    Private Sub EsperarTermine(eventos As Object)
+   Function Ultim_idFact(idFact As Integer) As Integer
+      '? devuelve el ultimo documento de referencia
+      Dim instSQL = $"select top 1 Referencia from [fact.facturaReferencia]
+                        where idFactura	= {idFact}
+                        order by FechaEmision desc"
+      Dim Res = conn.llena(instSQL)
+
+      If Res.Count > 0 Then
+         Return Res(0)(0)
+      Else
+         Return Nothing
+      End If
+   End Function
+
+   Function Ultim_DocRef(idFact As Integer) As String
+      '? devuelve el ultimo documento de referencia
+      Dim instSQL = $"select top 1 Numero from [fact.facturaReferencia]
+                        where idFactura	= {idFact}
+                        order by FechaEmision desc"
+      Dim Res = conn.llena(instSQL)
+
+      If Res.Count > 0 Then
+         Return Res(0)(0)
+      Else
+         Return Nothing
+      End If
+   End Function
+
+
+   Function EnviaCorreo(factura As Integer, ruta As String, clave As String) As String
+      Try
+         '? Enviar por correo el archivo 
+         Dim correo As New cCorreo With {.cnf = cnf}
+         correo.enviar(factura, ruta, clave, CSA_config)
+         Return correo.statusEnvio
+
+      Catch ex As Exception
+         Throw
+      End Try
+
+   End Function
+
+
+   Private Sub EsperarTermine(eventos As Object)
       Dim evs() As ManualResetEvent = eventos
       WaitHandle.WaitAll(evs)   '' espera que terminen todo los hilos
    End Sub
 
 
-   Function TokenExpirado(pTK As String) As Boolean
-      If pTK <> "" Then
-         Dim handler As JwtSecurityTokenHandler = New JwtSecurityTokenHandler()
-         Dim tokenS = handler.ReadToken(pTK)
-         Return (fechaCR(tokenS.ValidTo) <= Now.AddMinutes(1))
-      Else
-         Return True
-      End If
-   End Function
-
-   Function tokenExpiraEn(pTK) As String
-      Dim handler As JwtSecurityTokenHandler = New JwtSecurityTokenHandler()
-      Dim tokenS = handler.ReadToken(pTK)
-      Dim validoHasta = tokenS.ValidTo
-
-      Dim span As TimeSpan = fechaCR(validoHasta).Subtract(Now)
-      Return span.ToString("mm\:ss")
-
-   End Function
-
-   Function fechaCR(fechaUTC As DateTime) As DateTime
+    Function fechaCR(fechaUTC As DateTime) As DateTime
       Dim time2 As TimeZone = TimeZone.CurrentTimeZone
       Dim test As DateTime = time2.ToUniversalTime(fechaUTC)
       Dim CR = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time")
@@ -248,29 +362,34 @@ Public Class Form1
    End Function
 
    Public Sub ActLabel(ByVal pMsg As HttpResponseMessage)
-        If pMsg IsNot Nothing Then
+      Try
+         If pMsg IsNot Nothing Then
             If Me.lbReinicio.InvokeRequired Then
-                Dim d As New MensajeCallBackHeaders(AddressOf ActLabel)
-                Me.Invoke(d, New Object() {pMsg})
+               Dim d As New MensajeCallBackHeaders(AddressOf ActLabel)
+               Me.Invoke(d, New Object() {pMsg})
             Else
 
-                Dim fechaReinicio = UnixTimeStampToDateTime(CDbl(pMsg.Headers.GetValues("X-Ratelimit-Reset").FirstOrDefault))
+               Dim fechaReinicio = UnixTimeStampToDateTime(CDbl(pMsg.Headers.GetValues("X-Ratelimit-Reset").FirstOrDefault))
 
-                lbReinicio.Text = "reincio: " & fechaReinicio.ToShortDateString & " " & fechaReinicio.TimeOfDay.ToString
-                lbDisponible.Text = pMsg.Headers.GetValues("X-Ratelimit-Remaining").FirstOrDefault
-                lbTotal.Text = pMsg.Headers.GetValues("X-Ratelimit-Limit").FirstOrDefault
+               lbReinicio.Text = "reincio: " & fechaReinicio.ToShortDateString & " " & fechaReinicio.TimeOfDay.ToString
+               lbDisponible.Text = pMsg.Headers.GetValues("X-Ratelimit-Remaining").FirstOrDefault
+               lbTotal.Text = pMsg.Headers.GetValues("X-Ratelimit-Limit").FirstOrDefault
 
 
-                My.Settings.peticionesSobran = CInt(lbDisponible.Text)
-                My.Settings.petisionesLimite = CInt(lbTotal.Text)
-                My.Settings.peticionesReinicio = lbReinicio.Text
-                My.Settings.Save()
+               My.Settings.petSobran = CInt(lbDisponible.Text)
+               My.Settings.petLimite = CInt(lbTotal.Text)
+               My.Settings.petReinicio = lbReinicio.Text
+               My.Settings.Save()
             End If
 
-        End If
-    End Sub
+         End If
 
-    Public Shared Function UnixTimeStampToDateTime(ByVal unixTimeStamp As Double) As DateTime
+      Catch ex As Exception
+         Logger.e("ActLabel", ex)
+      End Try
+   End Sub
+
+   Public Shared Function UnixTimeStampToDateTime(ByVal unixTimeStamp As Double) As DateTime
       ' Unix timestamp is seconds past epoch
       Dim dtDateTime As Date = New DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc)
       dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToLocalTime
@@ -280,7 +399,7 @@ Public Class Form1
 
    Function HayInternet() As Boolean
       Try
-         Return My.Computer.Network.Ping("8.8.8.8", 10000)
+         Return My.Computer.Network.Ping("1.1.1.1", 10000)
       Catch ex As Exception
          Return False
       End Try
@@ -301,20 +420,23 @@ Public Class Form1
    End Function
 
    Public Function HayAPI() As Boolean
-        Try
-            Dim webClient As New System.Net.WebClient
-            Dim result As String = webClient.DownloadString("http://apis.gometa.org/status/status.json")
+      Try
+         Dim webClient As New System.Net.WebClient
+         Dim result As String = webClient.DownloadString("http://apis.gometa.org/status/status.json")
 
-            Dim StatusAPI = JsonConvert.DeserializeObject(Of gometa_status)(result)
+         Dim StatusAPI = JsonConvert.DeserializeObject(Of gometa_status)(result)
 
-            If StatusAPI.ApiProd.Status = "BAD" Then
-                Return False
-            End If
-            Return True
-        Catch ex As Exception
+         If StatusAPI.ApiProd.Status = "BAD" Then
             Return False
-        End Try
-    End Function
+         ElseIf CDec(Val(StatusAPI.ApiProd.GETp.AvgResponseTime15min)) < 15 Then
+            Return True
+         Else
+            Return False
+         End If
+      Catch ex As Exception
+         Return False
+      End Try
+   End Function
 
    Public Function HayServidorWEB() As Boolean
       Try
@@ -355,125 +477,129 @@ Public Class Form1
       End Try
    End Function
 
-    Public Sub ActLog(ByVal pMsg As String)
-        Dim fecha As String = Now.ToString("dd/mm/yyyy | hh\:mm\:ss } ")
+   Public Sub ActLog(ByVal pMsg As String)
+      Dim fecha As String = Now.ToString("dd/mm/yyyy | hh\:mm\:ss } ")
 
-        If Me.TextBoxResult.InvokeRequired Then
+      Try
+         If Me.TextBoxResult.InvokeRequired Then
             Dim d As New MensajeCallBack(AddressOf ActLog)
             Me.Invoke(d, New Object() {pMsg})
-        Else
-
+         Else
             TextBoxResult.Text += fecha & pMsg & vbCrLf
-        End If
-    End Sub
-#End Region
+         End If
 
+      Catch ex As Exception
+
+      End Try
+
+   End Sub
+#End Region  '! FIN DE REGION 
+
+
+
+
+    '! ########################################################################
+    '! ########################################################################
 
 #Region " Metodos del Formulario"
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        Dim reintentar = True
-        While reintentar
-            Dim connSQL As New ConexionSQL("Data Source=servidor-bd;Initial Catalog=Facturacion;User ID=colegiosa;Password=C$@123")
-            If Not connSQL.conexionOK Then
-                Dim result = MessageBox.Show("Servidor no econtrado", "Error SQL", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning)
+      Dim strCadenas As New EG.CajaHerramientas.cadena
 
-                Select Case result
-                    Case DialogResult.Cancel
-                        reintentar = False
-                End Select
-            Else
-                Exit While
-            End If
-        End While
+      Dim contildes As String = "ASOCIACIÓN EDUCATIVA SANTA ANA"
+      Dim sintildes As String = strCadenas.quitarTildes(contildes)
 
-        If Not reintentar Then
-            Application.Exit()
-        End If
+      Dim reintentar = True
+      While reintentar
+         Dim connSQL As New ConexionSQL("Data Source=servidor-bd;Initial Catalog=Facturacion;User ID=colegiosa;Password=C$@123")
+         If Not connSQL.conexionOK Then
+            Dim result = MessageBox.Show("Servidor no econtrado", "Error SQL", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning)
+
+            Select Case result
+               Case DialogResult.Cancel
+                  reintentar = False
+            End Select
+         Else
+            Exit While
+         End If
+      End While
+
+      If Not reintentar Then
+         Application.Exit()
+      End If
 
 
-        SwitchButton1.Visible = False
-        SwitchButton2.Value = (My.Settings.emisor_servidor = "api-prod") 'verifica estado y ajusta switch grafico
-
-    End Sub
-
-    Private Sub Form1_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
-
-      NotifyIcon1.Visible = False
-      NotifyIcon1 = Nothing
-      My.Settings.Save()
+      SwitchButton1.Visible = False
+      SwitchButton2.Value = (My.Settings.emisor_servidor = "api-prod") 'verifica estado y ajusta switch grafico
 
    End Sub
-    ''' <summary>
-    ''' 
-    ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
-    Private Sub Form1_Shown(sender As Object, e As EventArgs) Handles Me.Shown
 
 
+   ''' <summary>
+   ''' 
+   ''' </summary>
+   ''' <param name="sender"></param>
+   ''' <param name="e"></param>
+   Private Sub Form1_Shown(sender As Object, e As EventArgs) Handles Me.Shown
 
-        Cargar_Configuracion()
+      Cargar_Configuracion()
 
-        If CSA_config.apiUsuario.Contains("stag.") Then
-            Dim valor As Boolean = True
-            lbTotal.Visible = valor
-            lbDisponible.Visible = valor
-            lbReinicio.Visible = valor
-        Else
-            Dim valor As Boolean = False
-            lbTotal.Visible = valor
-            lbDisponible.Visible = valor
-            lbReinicio.Visible = valor
-        End If
+      If CSA_config.apiUsuario.Contains("stag.") Then
 
-        MicroChart1.Text = "Factura: "
-        MicroChart1.ChartType = eMicroChartType.HundredPercentBar
+         lbTotal.Text = My.Settings.petLimite
+         lbDisponible.Text = My.Settings.petSobran
+         lbReinicio.Text = My.Settings.petReinicio
 
-        MicroChart1.HundredPctChartStyle.BarColors(0) = Color.OrangeRed
-        MicroChart1.HundredPctChartStyle.BarColors(1) = Color.LightBlue
-        MicroChart1.HundredPctChartStyle.BarColors(2) = Color.Orange
-        MicroChart1.HundredPctChartStyle.BarColors(3) = Color.LightGreen
+         Dim valor As Boolean = True
+         lbTotal.Visible = valor
+         lbDisponible.Visible = valor
+         lbReinicio.Visible = valor
+      Else
+         Dim valor As Boolean = False
+         lbTotal.Visible = valor
+         lbDisponible.Visible = valor
+         lbReinicio.Visible = valor
+      End If
 
-        Dim conn As New ConexionSQL(cnf.Item("connSQL"))
-        Dim tabla = conn.llenaTabla("SELECT confirmacion, count(id) cantidad FROM [fact.factura] where confirmacion is not null group by confirmacion")
+      MicroChart1.Text = "Factura: "
+      MicroChart1.ChartType = eMicroChartType.HundredPercentBar
 
-        For Each reg In tabla.Rows
-            If reg.item("confirmacion") <> "aceptado" Then
+      MicroChart1.HundredPctChartStyle.BarColors(0) = Color.OrangeRed
+      MicroChart1.HundredPctChartStyle.BarColors(1) = Color.LightBlue
+      MicroChart1.HundredPctChartStyle.BarColors(2) = Color.Orange
+      MicroChart1.HundredPctChartStyle.BarColors(3) = Color.LightGreen
 
-                MicroChart1.DataPoints.Add(reg.item("cantidad"))
-                MicroChart1.DataPointTooltips.Add(reg.item("confirmacion") & ": " & reg.item("cantidad").ToString)
-            End If
-        Next
+      Dim conn As New ConexionSQL(cnf.Item("connSQL"))
+      Dim tabla = conn.llenaTabla("SELECT confirmacion, count(id) cantidad FROM [fact.factura] where confirmacion is not null group by confirmacion")
 
-        '' verifica si Hay sistema
-        BackgroundWorker1.RunWorkerAsync()
+      For Each reg In tabla.Rows
+         If reg.item("confirmacion") <> "aceptado" Then
+            MicroChart1.DataPoints.Add(reg.item("cantidad"))
+            MicroChart1.DataPointTooltips.Add(reg.item("confirmacion") & ": " & reg.item("cantidad").ToString)
+         End If
+      Next
 
-        '? //////////////////////////////////////////////////////////////////
-        Try   ' Inicia hilo de ejecucion de envio
-            hiloFactura.IsBackground = True
-            hiloFactura.Name = "Genera Facturas"
-            hiloFactura.Start()
-            Me.SwitchButton1.Visible = True
-        Catch ex As Exception
-            MessageBox.Show("Error al cargar Hilo")
-        End Try
+      '' verifica si Hay sistema
+      BackgroundWorker1.RunWorkerAsync()
 
-    End Sub
+      '? //////////////////////////////////////////////////////////////////
+      Try   ' Inicia hilo de ejecucion de envio
+         _CicloEnvio = True
+         hiloFactura.IsBackground = True
+         hiloFactura.Name = "Genera Facturas"
+         hiloFactura.Start()
+         Me.SwitchButton1.Visible = True
+      Catch ex As Exception
+         MessageBox.Show("Error al cargar Hilo")
+      End Try
+
+   End Sub
 
 
+   Private Sub Form1_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
 
-    ''' <summary>
-    ''' Evita cerrar la apicacion
-    ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
-    Private Sub Form1_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-      Me.WindowState = FormWindowState.Minimized
-      Me.Visible = False
-      NotifyIcon1.Visible = True
-      e.Cancel = True
+      My.Settings.Save()
    End Sub
 
 
@@ -486,7 +612,6 @@ Public Class Form1
 
    End Sub
 
-
    Private Sub SwitchButton1_ValueChanged(sender As Object, e As EventArgs) Handles SwitchButton1.ValueChanged
 
 #Disable Warning BC40000 ' El tipo o el miembro están obsoletos
@@ -496,11 +621,11 @@ Public Class Form1
             ComboBoxEx1.Enabled = True
             SwitchButton2.Enabled = True
          Else
-            If hiloFactura.ThreadState = ThreadState.Suspended Then
+            If hiloFactura.IsBackground Then
                hiloFactura.Resume()
+               ComboBoxEx1.Enabled = False
+               SwitchButton2.Enabled = False
             End If
-            ComboBoxEx1.Enabled = False
-            SwitchButton2.Enabled = False
 
          End If
       End If
@@ -528,15 +653,22 @@ Public Class Form1
       If Not BackgroundWorker1.IsBusy Then
          BackgroundWorker1.RunWorkerAsync()
       End If
-
    End Sub
 
-   Private Sub CircularProgress1_MouseClick(sender As Object, e As MouseEventArgs) Handles CircularProgress1.MouseClick
-      Application.Exit()
+   Private Sub SalirToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SalirToolStripMenuItem.Click
+      NotifyIcon1.Visible = False
+      Me.WindowState = FormWindowState.Minimized
+
+      hiloFactura.Abort()
+      Me.Close()
    End Sub
 
 #End Region
 
+
+
+    '! ########################################################################
+    '! ########################################################################
 
 #Region " Hilo de estados de conexion"
     Private Sub BackgroundWorker1_DoWork(sender As Object, e As DoWorkEventArgs) Handles BackgroundWorker1.DoWork
@@ -555,33 +687,30 @@ Public Class Form1
       cbCertificado.Checked = HayCertificado()
    End Sub
 
-   Private Sub SalirToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SalirToolStripMenuItem.Click
-      NotifyIcon1.Visible = False
-      Application.Exit()
+
+
+   Private Sub SwitchButton2_ValueChanged(sender As Object, e As EventArgs) Handles SwitchButton2.ValueChanged
+      Guarda_Datos_Emisor()
    End Sub
 
-    Private Sub SwitchButton2_ValueChanged(sender As Object, e As EventArgs) Handles SwitchButton2.ValueChanged
-        Guarda_Datos_Emisor()
-    End Sub
 
-
-    Private Sub ComboBoxEx1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxEx1.SelectedIndexChanged
+   Private Sub ComboBoxEx1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxEx1.SelectedIndexChanged
       Guarda_Datos_Emisor()
    End Sub
 
    Sub Guarda_Datos_Emisor()
 
-        If ComboBoxEx1.SelectedValue IsNot Nothing Then
-            My.Settings.emisor = ComboBoxEx1.SelectedValue
-            My.Settings.emisor_servidor = IIf(SwitchButton2.Value, "api-prod", "api-stag")
-            My.Settings.Save()
+      If ComboBoxEx1.SelectedValue IsNot Nothing Then
+         My.Settings.emisor = ComboBoxEx1.SelectedValue
+         My.Settings.emisor_servidor = IIf(SwitchButton2.Value, "api-prod", "api-stag")
+         My.Settings.Save()
 
-            '? Carga la nueva configuracion
-            Cargar_Configuracion()
-        End If
-    End Sub
+         '? Carga la nueva configuracion
+         Cargar_Configuracion()
+      End If
+   End Sub
 
-    Sub Cargar_Configuracion()
+   Sub Cargar_Configuracion()
 
       'TODO: esta línea de código carga datos en la tabla 'EFacturaDataSet.Emisores' Puede moverla o quitarla según sea necesario.
       Me.EmisoresTableAdapter.Fill(Me.EFacturaDataSet.Emisores)
@@ -610,7 +739,7 @@ Public Class Form1
          ActLog("ERROR :" & "configuracion no cargada")
       End If
 
-        If Not HayCertificado() Then
+      If Not HayCertificado() Then
          ActLog("ERROR :" & "Llave no encontrada")
          SwitchButton1.Value = False
       End If
@@ -620,10 +749,6 @@ Public Class Form1
          SwitchButton1.Value = False
       End If
 
-      lbTotal.Text = My.Settings.petisionesLimite
-      lbDisponible.Text = My.Settings.peticionesSobran
-      lbReinicio.Text = My.Settings.peticionesReinicio
-
       '? verifica si hay sistema
       If BackgroundWorker1.IsBusy Then
          BackgroundWorker1.CancelAsync()
@@ -631,6 +756,7 @@ Public Class Form1
          BackgroundWorker1.RunWorkerAsync()
       End If
    End Sub
+
 
 #End Region
 

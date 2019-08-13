@@ -12,7 +12,7 @@ namespace CR.FacturaElectronica.Entidades
         public string NumeroDocumento { get; set; }
         public string NombreInstitucion { get; set; }
         public DateTime FechaEmision { get; set; }
-        public decimal MontoImpuesto { get; set; }
-        public string PorcentajeCompra { get; set; }
+        public decimal MontoExoneracion { get; set; }
+        public string PorcentajeExoneracion { get; set; }
     }
 }

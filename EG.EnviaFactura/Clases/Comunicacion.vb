@@ -88,56 +88,14 @@ Public Class Comunicacion
             response = http.PostAsync(URL_RECEPCION + "recepcion", oString).Result
             res = response.Content.ReadAsStringAsync.Result          '/////////////////// envia documentos xml
             statusCode = response.StatusCode
-            Dim errorCode As String = ""
-
 
         Catch ex As Exception
-            Throw New Exception("Envia XML:" & ex.Message)
+            response = New HttpResponseMessage(Net.HttpStatusCode.Forbidden)
         End Try
-
-
-        '' ? /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        'Try  '' confirma xml
-
-        '    If response.IsSuccessStatusCode Then
-
-        '    '? tiempo de espera para consulta el estado de recepcion
-        '    Thread.Sleep(4000)
-
-        '    http = New HttpClient
-        '        http.DefaultRequestHeaders.Add("authorization", "Bearer " + TK)
-        '        Dim urlHacienda As String = URL_RECEPCION + "recepcion/" + objRecepcion.clave
-        '        response = http.GetAsync(urlHacienda).Result                                    '/////////////////// envia consulta
-        '        res = response.Content.ReadAsStringAsync.Result
-
-        '        jsonRespuesta = res.ToString
-        '        Dim RH As RespuestaHacienda = Newtonsoft.Json.JsonConvert.DeserializeObject(Of RespuestaHacienda)(res)
-
-        '        If RH.respuesta_xml <> "" Then
-        '            xmlRespuesta = Funciones.DecodeBase64ToXML(RH.respuesta_xml)
-        '        End If
-
-        '        estadoFactura = RH.ind_estado
-        '        mensajeRespuesta += "Confirmación: " & statusCode & " Estado: " & estadoFactura
-        '    Else
-        '        Select Case response.StatusCode
-        '            Case 400
-        '                estadoFactura = response.Headers.GetValues("X-Error-Cause").FirstOrDefault
-        '            Case Else
-        '                estadoFactura = res
-        '        End Select
-        '    End If
-
-        'Catch ex As Exception
-        '    Throw New Exception("Envia datos, confirma" & ex.Message)
-        'End Try
-
-
     End Sub
 
     Public Sub ConsultaEstatus(TK As String, claveConsultar As String)
         Try
-
             Dim http As HttpClient = New HttpClient
             http.DefaultRequestHeaders.Add("authorization", "Bearer " + TK)
 
@@ -164,10 +122,8 @@ Public Class Comunicacion
                     mensajeRespuesta = "Confirmación: " & errorGet & vbCrLf
             End Select
 
-
-
         Catch ex As Exception
-         Throw New Exception(ex.Message)
+            Throw New Exception(ex.Message)
       End Try
     End Sub
 

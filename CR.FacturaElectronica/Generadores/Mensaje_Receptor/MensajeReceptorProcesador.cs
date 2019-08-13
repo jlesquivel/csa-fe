@@ -7,9 +7,12 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
+
 namespace CR.FacturaElectronica.Mensaje_Receptor
+
+
 {
-    class MensajeReceptorProcesador 
+    public partial class MensajeReceptorProcesador 
     {
         
         // Guarda el XML en un archivo fisico
@@ -25,9 +28,9 @@ namespace CR.FacturaElectronica.Mensaje_Receptor
                 //Asinga los valores
                 vloConfiguraciones.Encoding = new UnicodeEncoding(false, false); 
                 vloConfiguraciones.Indent = true;
-                vloConfiguraciones.OmitXmlDeclaration = true;
+                vloConfiguraciones.OmitXmlDeclaration = false;
 
-                using (StringWriter vloEscritor = new StringWriter())
+                using (StringWriter vloEscritor = new StringWriterWithEncoding(Encoding.UTF8))
                 {
                     using (XmlWriter xmlWriter = XmlWriter.Create(vloEscritor, vloConfiguraciones))
                     {
@@ -43,4 +46,23 @@ namespace CR.FacturaElectronica.Mensaje_Receptor
             }
         }
     }
+
+
+    public class StringWriterWithEncoding : StringWriter
+    {
+        private Encoding myEncoding;
+        public override Encoding Encoding
+        {
+            get
+            {
+                return myEncoding;
+            }
+        }
+        public StringWriterWithEncoding(Encoding encoding)
+            : base()
+        {
+            myEncoding = encoding;
+        }
+    }
+
 }
