@@ -15,7 +15,7 @@
       <Value Profile="(Default)">3002182080</Value>
     </Setting>
     <Setting Name="emisor_servidor" Type="System.String" Scope="User">
-      <Value Profile="(Default)">api-stag</Value>
+      <Value Profile="(Default)">api-prod</Value>
     </Setting>
   </Settings>
 </SettingsFile>

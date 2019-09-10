@@ -105,7 +105,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("api-stag")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("api-prod")>  _
         Public Property emisor_servidor() As String
             Get
                 Return CType(Me("emisor_servidor"),String)

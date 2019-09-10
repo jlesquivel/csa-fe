@@ -89,9 +89,10 @@ Public Class Form1
                             envia_facturas(factDB, TK)
 
                             cosulta_estado_factura(factParalelas, TK)
+
                         Else
 
-                            'cosulta_estado_factura(factParalelas, TK)
+                            cosulta_estado_factura(factParalelas, TK)
 
                             '! CONFIRMA  LAS FACTURAS RECIBIDAS
 
@@ -180,7 +181,7 @@ Public Class Form1
 
    Private Sub cosulta_estado_factura(factParalelas As Integer, TK As String)
 
-        Thread.Sleep(6000)
+        Thread.Sleep(3000)
 
         Dim Sql = $"select top {factParalelas} id,enc_clave from [fact.factura] 
                         where confirmacion in ('Accepted','procesando') and confirmacionMsg is null"
@@ -253,27 +254,32 @@ Public Class Form1
                   End Select
 
 
-                  '' ENVIAR XML, PDF , ACUSE A RECEPTOR
-                  '' cargar el archivo PDF al servidor web CSALIB.ORG
+                        '' ENVIAR XML, PDF , ACUSE A RECEPTOR
+                        '' cargar el archivo PDF al servidor web CSALIB.ORG
+                        Dim ruta = cnf.Item("rutaArch")
+                        ruta = ruta & IIf(ruta.EndsWith("\"), "", "\")
 
-                  Dim ftpCSALIB As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
-                  Dim ftpCSALIB2 As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
+                        '? //////////////////////////////////////  Genera QR y PDF 
+                        Dim pdf = New cPDF With {.clave = clave}
+                        pdf.salvarQR(idFact)
+                        pdf.GenerarPDf(ruta, clave, idFact, My.Settings.emisor_servidor)
 
-                  Dim ruta = cnf.Item("rutaArch")
-                  ruta = ruta & IIf(ruta.EndsWith("\"), "", "\")
 
-                  ftpCSALIB.enviar(ruta & clave & ".xml")
-                  ftpCSALIB2.enviar(ruta & clave & ".pdf")
+                        Dim ftpCSALIB As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
+                        Dim ftpCSALIB2 As New cCargarFTP(cnf.Item("ftpHost"), cnf.Item("ftpuser"), cnf.Item("ftpPass"))
 
-                  ftpCSALIB = Nothing
-                  ftpCSALIB2 = Nothing
 
-                  EnviaCorreo(idFact, ruta, clave)
+                        ftpCSALIB.enviar(ruta & clave & ".xml")
+                        ftpCSALIB2.enviar(ruta & clave & ".pdf")
 
-               Case "procesando"
+                        ftpCSALIB = Nothing
+                        ftpCSALIB2 = Nothing
+
+                        EnviaCorreo(idFact, ruta, clave)
+
+                    Case "procesando"
                   Thread.Sleep(5000)
-               Case "rechazado"
-
+                    Case "rechazado"
 
                         Select Case tipoDoc
                      Case "01"

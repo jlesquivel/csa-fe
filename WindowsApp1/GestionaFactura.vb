@@ -1,10 +1,8 @@
 ﻿Imports System.Threading
 Imports EG.EnviaFactura
 Imports CR.FacturaElectronica
-Imports EG.CajaHerramientas
-Imports System.Data.SqlClient
 Imports System.Net.Http
-Imports System
+
 
 
 Public Class GestionaFactura
@@ -79,10 +77,11 @@ Public Class GestionaFactura
             End Try
 
 
-            '? ////////////////////////////////////////////////////////////////////////////////////////  Genera QR y PDF 
-            Dim pdf = New cPDF With {.clave = res.ClaveDocCreada}
-                pdf.salvarQR(idFact)
-                pdf.GenerarPDf(rutaArchivos, res.ClaveDocCreada, idFact, My.Settings.emisor_servidor)
+                '? ////////////////////////////////////////////////////////////////////////////////////////  Genera QR y PDF 
+                'Dim pdf = New cPDF With {.clave = res.ClaveDocCreada}
+                'pdf.salvarQR(idFact)
+                'pdf.GenerarPDf(rutaArchivos, res.ClaveDocCreada, idFact, My.Settings.emisor_servidor)
+
             End If
 
             '?/////////////////////////////////////////////////////////////////////////////////////////////////// ENVIA HACIENDA

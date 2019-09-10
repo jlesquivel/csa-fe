@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{BA151700-8469-416D-9617-AB56B372569A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>ConsoleApp1.genFE</StartupObject>
+    <StartupObject>ConsoleApp1.genMensajeReceptor</StartupObject>
     <RootNamespace>ConsoleApp1</RootNamespace>
     <AssemblyName>ConsoleApp1</AssemblyName>
     <FileAlignment>512</FileAlignment>

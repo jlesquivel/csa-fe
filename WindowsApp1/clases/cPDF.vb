@@ -99,7 +99,16 @@ Public Class cPDF
                ("An error has occurred while connecting to the database.")
         Catch engEx As EngineException
             Throw New Exception(engEx.Message)
+
+        Catch ex As System.Threading.ThreadAbortException
+            Throw New Exception(ex.Message)
+        Catch ex As Exception
+            Throw New Exception(ex.Message)
+        Finally
+
         End Try
+
+
 
     End Sub
 

@@ -140,6 +140,18 @@
     <Compile Include="clases\cFactura.vb" />
     <Compile Include="clases\cMensajeReceptor.vb" />
     <Compile Include="clases\cPDF.vb" />
+    <Compile Include="eConfirma.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>eConfirma.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="eConfirma1.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>eConfirma.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="eFactura.vb">
       <DependentUpon>eFactura.rpt</DependentUpon>
       <SubType>Component</SubType>
@@ -187,6 +199,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="eConfirma.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>eConfirma1.vb</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="eFactura.rpt">
       <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
       <LastGenOutput>eFactura.vb</LastGenOutput>

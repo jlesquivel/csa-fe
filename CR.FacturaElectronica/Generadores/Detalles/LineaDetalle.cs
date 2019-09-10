@@ -38,311 +38,342 @@ namespace CR.FacturaElectronica.Generadores.Detalles
         [System.Xml.Serialization.XmlElementAttribute("Impuesto")]
         public Impuesto[] Impuesto { get; set; }
 
+        public decimal ImpuestoNeto { get; set; }    
+
+
         public decimal MontoTotalLinea { get; set; }
 
         [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.0.30319.1")]
         [System.SerializableAttribute()]
+
         public enum UnidadMedidaType
         {
 
-            /// <comentarios/>
+            /// <remarks/>
+            Al,
+
+            /// <remarks/>
+            Alc,
+
+            /// <remarks/>
+            Cm,
+
+            /// <remarks/>
+            I,
+
+            /// <remarks/>
+            Os,
+
+            /// <remarks/>
             Sp,
 
-            /// <comentarios/>
+            /// <remarks/>
+            Spe,
+
+            /// <remarks/>
+            St,
+
+            /// <remarks/>
             m,
 
-            /// <comentarios/>
+            /// <remarks/>
             kg,
 
-            /// <comentarios/>
+            /// <remarks/>
             s,
 
-            /// <comentarios/>
+            /// <remarks/>
             A,
 
-            /// <comentarios/>
+            /// <remarks/>
             K,
 
-            /// <comentarios/>
+            /// <remarks/>
             mol,
 
-            /// <comentarios/>
+            /// <remarks/>
             cd,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("m²")]
             m1,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("m³")]
             m2,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("m/s")]
             ms,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("m/s²")]
             ms1,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("1/m")]
             Item1m,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("kg/m³")]
             kgm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("A/m²")]
             Am,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("A/m")]
             Am1,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("mol/m³")]
             molm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("cd/m²")]
             cdm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("1")]
             Item1,
 
-            /// <comentarios/>
+            /// <remarks/>
             rad,
 
-            /// <comentarios/>
+            /// <remarks/>
             sr,
 
-            /// <comentarios/>
+            /// <remarks/>
             Hz,
 
-            /// <comentarios/>
+            /// <remarks/>
             N,
 
-            /// <comentarios/>
+            /// <remarks/>
             Pa,
 
-            /// <comentarios/>
+            /// <remarks/>
             J,
 
-            /// <comentarios/>
+            /// <remarks/>
             W,
 
-            /// <comentarios/>
+            /// <remarks/>
             C,
 
-            /// <comentarios/>
+            /// <remarks/>
             V,
 
-            /// <comentarios/>
+            /// <remarks/>
             F,
 
-            /// <comentarios/>
+            /// <remarks/>
             Ω,
 
-            /// <comentarios/>
+            /// <remarks/>
             S,
 
-            /// <comentarios/>
+            /// <remarks/>
             Wb,
 
-            /// <comentarios/>
+            /// <remarks/>
             T,
 
-            /// <comentarios/>
+            /// <remarks/>
             H,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("°C")]
             C1,
 
-            /// <comentarios/>
+            /// <remarks/>
             lm,
 
-            /// <comentarios/>
+            /// <remarks/>
             lx,
 
-            /// <comentarios/>
+            /// <remarks/>
             Bq,
 
-            /// <comentarios/>
+            /// <remarks/>
             Gy,
 
-            /// <comentarios/>
+            /// <remarks/>
             Sv,
 
-            /// <comentarios/>
+            /// <remarks/>
             kat,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("Pa·s")]
             Pas,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("N·m")]
             Nm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("N/m")]
             Nm1,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("rad/s")]
             rads,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("rad/s²")]
             rads1,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("W/m²")]
             Wm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("J/K")]
             JK,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("J/(kg·K)")]
             JkgK,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("J/kg")]
             Jkg,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("W/(m·K)")]
             WmK,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("J/m³")]
             Jm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("V/m")]
             Vm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("C/m³")]
-            Cm,
-
-            /// <comentarios/>
-            [System.Xml.Serialization.XmlEnumAttribute("C/m²")]
             Cm1,
 
-            /// <comentarios/>
+            /// <remarks/>
+            [System.Xml.Serialization.XmlEnumAttribute("C/m²")]
+            Cm2,
+
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("F/m")]
             Fm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("H/m")]
             Hm,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("J/mol")]
             Jmol,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("J/(mol·K)")]
             JmolK,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("C/kg")]
             Ckg,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("Gy/s")]
             Gys,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("W/sr")]
             Wsr,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("W/(m²·sr)")]
             Wmsr,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("kat/m³")]
             katm,
 
-            /// <comentarios/>
+            /// <remarks/>
             min,
 
-            /// <comentarios/>
+            /// <remarks/>
             h,
 
-            /// <comentarios/>
+            /// <remarks/>
             d,
 
-            /// <comentarios/>
+            /// <remarks/>
             º,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("´")]
             Item,
 
-            /// <comentarios/>
+            /// <remarks/>
             [System.Xml.Serialization.XmlEnumAttribute("´´")]
             Item2,
 
-            /// <comentarios/>
+            /// <remarks/>
             L,
 
-            /// <comentarios/>
+            /// <remarks/>
             t,
 
-            /// <comentarios/>
+            /// <remarks/>
             Np,
 
-            /// <comentarios/>
+            /// <remarks/>
             B,
 
-            /// <comentarios/>
+            /// <remarks/>
             eV,
 
-            /// <comentarios/>
+            /// <remarks/>
             u,
 
-            /// <comentarios/>
+            /// <remarks/>
             ua,
 
-            /// <comentarios/>
+            /// <remarks/>
             Unid,
 
-            /// <comentarios/>
+            /// <remarks/>
             Gal,
 
-            /// <comentarios/>
+            /// <remarks/>
             g,
 
-            /// <comentarios/>
+            /// <remarks/>
             Km,
 
-            /// <comentarios/>
+            /// <remarks/>
+            Kw,
+
+            /// <remarks/>
             ln,
 
-            /// <comentarios/>
+            /// <remarks/>
             cm,
 
-            /// <comentarios/>
+            /// <remarks/>
             mL,
 
-            /// <comentarios/>
+            /// <remarks/>
             mm,
 
-            /// <comentarios/>
+            /// <remarks/>
             Oz,
 
-            /// <comentarios/>
+            /// <remarks/>
             Otros,
         }
 
     }
 }
+
+
+

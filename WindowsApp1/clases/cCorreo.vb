@@ -94,12 +94,14 @@ Public Class cCorreo
         Dim correo As String = Nothing
 
         Dim res = conn.llenaTabla("EXEC [receptor_idFactura]" & idFact.ToString)
-        If res.Rows.Count > 0 Then
-            correo = res(0).Item("correo")
+        If res IsNot Nothing Then
+            If res.Rows.Count > 0 Then
+                correo = res(0).Item("correo")
 
-            Dim correoEG As New EG.CajaHerramientas.email
-            If Not correoEG.IsValidEmail(correo) Then
-                correo = Nothing
+                Dim correoEG As New EG.CajaHerramientas.email
+                If Not correoEG.IsValidEmail(correo) Then
+                    correo = Nothing
+                End If
             End If
         End If
 

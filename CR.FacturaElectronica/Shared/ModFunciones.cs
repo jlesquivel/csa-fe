@@ -89,10 +89,18 @@ namespace CR.FacturaElectronica.Shared
 
         private static string GetXmlAttrUsandoElValor<T>(T valorEnum)
         {
-            Type type = valorEnum.GetType();
-            FieldInfo info = type.GetField(Enum.GetName(typeof(T), valorEnum));
-            //XmlEnumAttribute att = (XmlEnumAttribute)info.GetCustomAttributes(typeof(XmlEnumAttribute), false)[0];
-            return info.Name;
+                Type type = valorEnum.GetType();
+                FieldInfo info = type.GetField(Enum.GetName(typeof(T), valorEnum));            
+
+            try
+            {
+                XmlEnumAttribute att = (XmlEnumAttribute)info.GetCustomAttributes(typeof(XmlEnumAttribute), false)[0];
+                return att.Name;
+            }
+            catch (Exception)
+            {
+                return info.Name;
+            }
         }
     }
          

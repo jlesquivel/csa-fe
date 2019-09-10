@@ -26,18 +26,19 @@ Module genFE
 
     Sub Main()
 
+
         Console.WriteLine("INICIADO Genera Factura Electronica")
 
         Dim TK As String = ""
         Cargar_Configuracion()
 
-
-
         '?//// ++++++++++++++++++++++++++++++++++++++  GENERA ARCHIVO XML
         Dim res As RespuestaCreacionDoc
         Dim facturar As New cFactura With {.rutaArchivos = "D:\", .emisorDB = cnf}
 
-        res = facturar.GenerarXML(4798)
+        res = facturar.GenerarXML(8248)
+
+        'bonificacion 8247   
 
 
         '?//// ++++++++++++++++++++++++++++++++++++++  TOKEN
@@ -290,8 +291,7 @@ Public Class cFactura
                 }
         End If
 
-        'TODO corregir el tipo de documento que no solo sea factura
-        ' 
+
         Dim p As New DocumentoParametros() With {
             .ConsecutivoSistema = factDB.Item("consecutivo"),
             .Sucursal = factDB.Item("enc_sucursal"),
@@ -320,7 +320,7 @@ Public Class cFactura
                .TotalImpuesto = factDB.Item("res_totalImpuestos"),
                .TotalMercanciasExentas = factDB.Item("res_totalMercanciaExenta"),
                .TotalMercanciasGravadas = factDB.Item("res_totalMercanciaGravadas"),
-               .TotalMercExonerada = 0.0,                                           ' TODO AGREGAR CAMPOS EN BASES DE DATOS RESUMEN EN FACTURA DE EXONERACION 
+               .TotalMercExonerada = 0.0,
                .TotalServExentos = factDB.Item("res_totalServExento"),
                .TotalServGravados = factDB.Item("res_totalServGravados"),
                .TotalServExonerado = 0.0,

@@ -27,7 +27,7 @@ Module genMensajeReceptor
             Dim res As RespuestaCreacionDoc
             Dim oMR As New CMensajeReceptor(tabladb(0))
 
-            res = oMR.GenerarXML(2770)
+            res = oMR.GenerarXML(520)
             If res.ClaveDocCreada IsNot Nothing Then
                 Console.WriteLine("CREAdo*********")
             End If
@@ -36,8 +36,6 @@ Module genMensajeReceptor
     End Sub
 
 End Module
-
-
 
 
 Public Class CMensajeReceptor
@@ -70,7 +68,7 @@ Public Class CMensajeReceptor
     Private Function BuscaMR(Id As Integer) As DataRow
 
         Dim connSQL As New ConexionSQL(_StrConn)
-        Dim sqlconf As String = $"SELECT * FROM [eFactura].[dbo].[MensajeReceptor]  WHERE id = {Id} "
+        Dim sqlconf As String = $"SELECT * FROM [dbo].[MensajeReceptor]  WHERE id = {Id} "
 
         Dim tabladb = connSQL.llenaTabla(sqlconf)
         If tabladb.Rows.Count = 1 Then
@@ -93,7 +91,7 @@ Public Class CMensajeReceptor
         '? Corregir los datos del receptor
         Try
 
-            Dim MsjRecepDB = BuscaMR(474)
+            Dim MsjRecepDB = BuscaMR(IdMsjReceptor)
             If MsjRecepDB IsNot Nothing Then
                 Dim msgReceptor As MensajeReceptor = New MensajeReceptor()
                 With msgReceptor
@@ -210,3 +208,4 @@ End Class
 'Bienes de Capital11                                03
 'Gasto corriente12 no genera crédito    04
 'Proporcionalidad13                             05
+
